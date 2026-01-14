@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Master Core</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--app-font-family, system-ui); font-size: var(--app-font-size, 14px); background: var(--bg-primary, #1e1e1e); color: var(--text-primary, #e0e0e0); line-height: 1.6; padding: 1rem; }
+    [data-theme="light"] { --bg-primary: #f5f5f5; --text-primary: #333; --border: #ddd; --bg-secondary: #fff; }
+    [data-theme="dark"] { --bg-primary: #1e1e1e; --text-primary: #e0e0e0; --border: #444; --bg-secondary: #2a2a2a; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    header { padding: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .controls { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .control-group { display: flex; gap: 0.5rem; align-items: center; }
+    .button { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+    .button:hover { background: #0056b3; }
+    .button.active { background: #28a745; }
+    input[type="text"], select { padding: 0.5rem; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); border-radius: 4px; }
+    .file-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+    .file-item { padding: 0.5rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .file-item:hover { background: #3a7ca5; }
+    .file-item.active { background: #28a745; font-weight: bold; }
+    .badge { margin-left: 0.5rem; background: #666; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--bg-secondary); font-weight: bold; position: sticky; top: 0; }
+    tr:hover { background: var(--bg-secondary); }
+    .highlight { background: #ffff00; color: #000; font-weight: bold; }
+    .status-bar { padding: 1rem; background: var(--bg-secondary); border-top: 1px solid var(--border); margin-top: 1rem; border-radius: 4px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 100; }
+    .modal.open { display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: var(--bg-primary); padding: 2rem; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 90%; }
+    .filter-chip { display: inline-block; padding: 0.3rem 0.8rem; background: #666; border-radius: 20px; margin-right: 0.5rem; font-size: 0.9rem; }
+    .chip { padding: 0.4rem 0.8rem; background: #444; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+    .chip.active { background: #28a745; }
+    .theme-pill { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; border-radius: 20px; border: 2px solid #666; }
+    .theme-pill.active { border-color: #28a745; background: #28a745; }
+    .notes-cell { position: relative; }
+    .notes-icon { cursor: pointer; margin-left: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    <header>
+      <h1>Site Master Core</h1>
+      <p>Telecommunications Site Database</p>
+    </header>
+    <div class="controls">
+      <div class="control-group">
+        <button id="uploadBtn" class="button">Upload CSV</button>
+        <input type="file" id="fileInput" multiple accept=".csv" style="display:none;">
+      </div>
+      <div class="control-group">
+        <input type="text" id="searchInput" placeholder="Search..." style="flex:1; min-width:200px;">
+        <button id="searchBtn" class="button">Search</button>
+      </div>
+      <div id="scopeToggle" class="control-group">
+        <button data-scope="all" class="button active">All files</button>
+        <button data-scope="current" class="button">Current</button>
+      </div>
+      <div id="modeToggle" class="control-group">
+        <button data-mode="siteid" class="button active">Site ID</button>
+        <button data-mode="row" class="button">Full row</button>
+      </div>
+    </div>
+    <div style="margin: 1rem 0;">
+      <strong>Files:</strong> <span id="fileCount">0 files</span> | <strong>Total Rows:</strong> <span id="rowCount">0 rows</span>
+    </div>
+    <div style="margin: 1rem 0;">
+      <strong>Quick filters:</strong>
+      <span id="quickChips" style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+        <span class="chip" data-chip="exact">Exact match</span>
+        <span class="chip" data-chip="contains">Contains</span>
+        <span class="chip active" data-chip="case">Case sensitive</span>
+      </span>
+    </div>
+    <div style="margin: 1rem 0;">
+      <strong>Files:</strong>
+      <div id="fileList" class="file-list"></div>
+    </div>
+    <div style="margin: 1rem 0;">
+      <strong>Theme:</strong> <span id="themeRow" style="display:flex; gap:0.5rem;">
+        <span class="theme-pill active" data-theme="dark">Dark</span>
+        <span class="theme-pill" data-theme="light">Light</span>
+      </span>
+    </div>
+    <div style="margin: 1rem 0;">
+      <label>Font Family: <select id="fontSelect" style="width:200px;"><option value="system-ui">System UI</option><option value="Georgia">Georgia</option><option value="monospace">Monospace</option></select></label>
+      <label style="margin-left:1rem;">Font Size: <input id="fontSizeRange" type="range" min="12" max="18" value="14" style="width:100px;"></label>
+    </div>
+    <div id="activeFilters" style="margin: 1rem 0;">
+      <strong>Active filters:</strong> <div style="display:flex; gap:0.3rem; flex-wrap:wrap;"></div>
+    </div>
+    <div style="overflow-x:auto; margin-top: 1rem;">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="status-bar">
+      <span id="statusText">Ready...</span> | <span id="selectionText">0 matches</span>
+      <a href="#" id="hostInfoLink" style="margin-left:1rem; color:#007bff; cursor:pointer;">About hosting</a>
+    </div>
+  </div>
+  <div id="hostModal" class="modal" data-close>
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2>About GitHub Pages Hosting</h2>
+      <p>This application is hosted on GitHub Pages. All CSV files are loaded directly from the repository.</p>
+      <p>No re-uploading needed! Just commit changes to the CSV files and they'll be live.</p>
+      <button class="button" data-close>Close</button>
+    </div>
+  </div>
+  <div id="detailsModal" class="modal" data-close>
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2 id="detailsTitle"></h2>
+      <div id="detailsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin:1rem 0;"></div>
+      <div>
+        <label>Note:<br><textarea id="detailsNote" style="width:100%; height:120px; padding:0.5rem; border:1px solid var(--border); border-radius:4px; background:var(--bg-secondary); color:var(--text-primary);"></textarea></label>
+      </div>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button id="detailsSave" class="button">Save note</button>
+        <button id="detailsClear" class="button">Clear</button>
+        <button class="button" data-close>Close</button>
+      </div>
+    </div>
+  </div>
+  <script src="site-master-core.js"></script>
+</body>
+</html>
