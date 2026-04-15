@@ -1,131 +1,1706 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Site Master Core</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logistics Master Hub — AI Powered + MRN PDF Generator</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: var(--app-font-family, system-ui); font-size: var(--app-font-size, 14px); background: var(--bg-primary, #1e1e1e); color: var(--text-primary, #e0e0e0); line-height: 1.6; padding: 1rem; }
-    [data-theme="light"] { --bg-primary: #f5f5f5; --text-primary: #333; --border: #ddd; --bg-secondary: #fff; }
-    [data-theme="dark"] { --bg-primary: #1e1e1e; --text-primary: #e0e0e0; --border: #444; --bg-secondary: #2a2a2a; }
-    .container { max-width: 1400px; margin: 0 auto; }
-    header { padding: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .controls { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .control-group { display: flex; gap: 0.5rem; align-items: center; }
-    .button { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-    .button:hover { background: #0056b3; }
-    .button.active { background: #28a745; }
-    input[type="text"], select { padding: 0.5rem; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); border-radius: 4px; }
-    .file-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
-    .file-item { padding: 0.5rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-    .file-item:hover { background: #3a7ca5; }
-    .file-item.active { background: #28a745; font-weight: bold; }
-    .badge { margin-left: 0.5rem; background: #666; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-    th { background: var(--bg-secondary); font-weight: bold; position: sticky; top: 0; }
-    tr:hover { background: var(--bg-secondary); }
-    .highlight { background: #ffff00; color: #000; font-weight: bold; }
-    .status-bar { padding: 1rem; background: var(--bg-secondary); border-top: 1px solid var(--border); margin-top: 1rem; border-radius: 4px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 100; }
-    .modal.open { display: flex; align-items: center; justify-content: center; }
-    .modal-content { background: var(--bg-primary); padding: 2rem; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 90%; }
-    .filter-chip { display: inline-block; padding: 0.3rem 0.8rem; background: #666; border-radius: 20px; margin-right: 0.5rem; font-size: 0.9rem; }
-    .chip { padding: 0.4rem 0.8rem; background: #444; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
-    .chip.active { background: #28a745; }
-    .theme-pill { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; border-radius: 20px; border: 2px solid #666; }
-    .theme-pill.active { border-color: #28a745; background: #28a745; }
-    .notes-cell { position: relative; }
-    .notes-icon { cursor: pointer; margin-left: 0.5rem; }
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --accent: #e60000;
+      --accent-dark: #b30000;
+      --accent-glow: rgba(230,0,0,0.18);
+      --panel: rgba(17,24,39,0.75);
+      --bg: #080c14;
+      --surface: #111520;
+      --surface2: #181e2e;
+      --border: rgba(255,255,255,0.07);
+      --text: #f0f2f8;
+      --muted: #6b7a99;
+      --green: #00d68f;
+      --yellow: #fbbf24;
+      --blue: #3b82f6;
+      --dynamic-text: 11px;
+      --dynamic-pad: 8px;
+      --app-font: 'Syne', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--app-font);
+      background-image:
+        radial-gradient(circle at 15% 50%, rgba(230,51,51,0.07), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(59,130,246,0.07), transparent 25%);
+      background-attachment: fixed;
+      transition: font-family 0.3s ease;
+    }
+
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex; gap: 0;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      position: sticky; top: 0; z-index: 30;
+      backdrop-filter: blur(16px);
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 22px;
+      font-family: var(--app-font);
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--muted);
+      border: none; background: transparent; cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── GLASSMORPHISM CARDS ── */
+    .card {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-main {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white; padding: 0.6rem 1.2rem; border-radius: 0.75rem;
+      font-weight: 800; text-transform: uppercase; font-size: 11px;
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+      box-shadow: 0 4px 15px rgba(204,0,0,0.3);
+      font-family: var(--app-font);
+    }
+    .btn-main:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.2); box-shadow: 0 8px 25px rgba(230,51,51,0.5); }
+
+    .input-base {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.75rem; color: white; padding: 0.6rem;
+      font-size: 11px; outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      font-family: var(--app-font);
+    }
+    .input-base:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(230,0,0,0.15); background: rgba(0,0,0,0.7); }
+
+    .transparent-input {
+      background: transparent; color: inherit; font-weight: inherit;
+      font-size: inherit; outline: none;
+      border: 1px dashed transparent; border-bottom: 1px dashed rgba(255,255,255,0.25);
+      transition: 0.2s; padding: 2px 4px; border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .transparent-input:focus, .transparent-input:hover { border-color: var(--accent); background: rgba(255,255,255,0.04); }
+
+    .shortcut-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid var(--accent); color: var(--accent);
+      padding: 0.35rem 1rem; border-radius: 2rem; font-size: 10px;
+      font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;
+      font-family: var(--app-font);
+    }
+    .shortcut-btn:hover { background: rgba(230,0,0,0.1); }
+    .active-block { background: var(--accent) !important; color: white !important; border-color: var(--accent) !important; box-shadow: 0 0 10px rgba(230,0,0,0.4); }
+
+    .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+
+    .loading-pulse { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .dyn-text { font-size: var(--dynamic-text) !important; transition: font-size 0.2s; }
+    .dyn-text-sm { font-size: calc(var(--dynamic-text) - 2px) !important; }
+    .dyn-pad { padding: var(--dynamic-pad) !important; transition: padding 0.2s; }
+
+    /* ── AI CHAT ── */
+    #ai-chat-widget { transition: transform 0.3s ease-in-out, opacity 0.3s; }
+    .chat-bubble-user { background: rgba(59,130,246,0.18); border-left: 2px solid #3b82f6; }
+    .chat-bubble-ai { background: rgba(230,0,0,0.08); border-left: 2px solid var(--accent); }
+
+    /* ── PDF TAB SPECIFIC ── */
+    .pdf-field label {
+      display: block; font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pdf-field input, .pdf-field textarea, .pdf-field select {
+      width: 100%; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      padding: 9px 13px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pdf-field input:focus, .pdf-field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .pdf-field textarea { resize: vertical; min-height: 60px; }
+    .pdf-field select option { background: #1a1e2e; }
+
+    .pdf-stat-card {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .pdf-stat-val { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .pdf-stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+
+    .pdf-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .pdf-table thead tr { background: rgba(0,0,0,0.5); }
+    .pdf-table thead th {
+      padding: 10px 13px; text-align: left;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .pdf-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .pdf-table tbody tr:last-child { border-bottom: none; }
+    .pdf-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .pdf-table tbody td { padding: 8px 12px; vertical-align: middle; }
+    .pdf-table tbody td input {
+      background: transparent; border: none;
+      border-bottom: 1px dashed rgba(255,255,255,0.18);
+      color: var(--text); font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; padding: 2px 4px; outline: none; width: 100%;
+      transition: border-color 0.2s;
+    }
+    .pdf-table tbody td input:focus { border-color: var(--accent); }
+
+    .import-zone {
+      border: 2px dashed rgba(255,255,255,0.1); border-radius: 14px;
+      padding: 24px 20px; text-align: center; cursor: pointer;
+      transition: all 0.3s; position: relative; background: rgba(0,0,0,0.2);
+    }
+    .import-zone:hover, .import-zone.drag-over { border-color: var(--accent); background: var(--accent-glow); }
+    .import-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+    /* toast */
+    #toast {
+      position: fixed; bottom: 90px; right: 28px; z-index: 9999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 20px; font-size: 12px; font-weight: 700;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6); opacity: 0; transform: translateY(8px);
+      transition: all 0.3s; pointer-events: none;
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--app-font);
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { border-left: 3px solid var(--green); }
+    #toast.error { border-left: 3px solid var(--accent); }
+
+    /* section label */
+    .sec-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .sec-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .tab-panel.active { animation: fadeIn 0.25s ease; }
+
+    .row-add-grid {
+      display: grid;
+      grid-template-columns: 120px 1fr 140px 70px auto;
+      gap: 8px; align-items: end;
+    }
   </style>
 </head>
-<body data-theme="dark">
-  <div class="container">
-    <header>
-      <h1>Site Master Core</h1>
-      <p>Telecommunications Site Database</p>
-    </header>
-    <div class="controls">
-      <div class="control-group">
-        <button id="uploadBtn" class="button">Upload CSV</button>
-        <input type="file" id="fileInput" multiple accept=".csv" style="display:none;">
+<body class="min-h-screen">
+
+<!-- ════════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header class="card m-4 mb-0 p-4 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-red-600" style="border-radius:1.25rem 1.25rem 0 0; margin-bottom:0;">
+  <div class="flex items-center gap-4">
+    <div class="h-12 w-12 bg-gradient-to-br from-red-500 to-red-800 rounded-2xl flex items-center justify-center text-white font-black text-2xl italic shadow-[0_0_20px_rgba(255,0,0,0.4)] border border-red-400/30 flex-shrink-0">V</div>
+    <div>
+      <h1 class="text-xl font-black uppercase tracking-tighter italic bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Logistics Master Engine</h1>
+      <p class="text-[10px] font-bold text-blue-400 tracking-widest mt-0.5 uppercase flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> Smart Parsing · AI Features · MRN PDF Generator</p>
+    </div>
+  </div>
+  <div class="flex gap-2 flex-wrap">
+    <button class="btn-main !bg-slate-700 hover:!bg-slate-600 !shadow-none" onclick="document.getElementById('settingsOverlay').classList.remove('hidden')">
+      <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Settings
+    </button>
+    <input type="file" id="excelFile" class="hidden" accept=".xlsx,.xls,.csv" onchange="processExcel(event)">
+    <button class="btn-main !bg-green-600 hover:!bg-green-500 !shadow-green-600/30" onclick="document.getElementById('excelFile').click()">
+      <i data-lucide="database" class="w-4 h-4"></i> Live DB
+    </button>
+    <button class="btn-main !bg-amber-500 hover:!bg-amber-400 !shadow-amber-500/30 !text-black" onclick="generateSafetyBriefWithAI()">
+      <i data-lucide="shield-alert" class="w-4 h-4"></i> Safety ✨
+    </button>
+    <button class="btn-main !bg-blue-600 hover:!bg-blue-500 !shadow-blue-600/30" onclick="exportMRN()">
+      <i data-lucide="download" class="w-4 h-4"></i> Export XLSX
+    </button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════
+     TAB BAR
+════════════════════════════════════════ -->
+<div class="tab-bar mx-4" style="border-radius:0; background:rgba(0,0,0,0.5);">
+  <button class="tab-btn active" onclick="switchTab('hub')" id="tab-hub">
+    <i data-lucide="cpu" class="w-4 h-4"></i> SF6 Hub
+  </button>
+  <button class="tab-btn" onclick="switchTab('catalog')" id="tab-catalog">
+    <i data-lucide="layers" class="w-4 h-4"></i> Catalog & Basket
+  </button>
+  <button class="tab-btn" onclick="switchTab('pdf')" id="tab-pdf">
+    <i data-lucide="file-text" class="w-4 h-4"></i> MRN PDF Generator
+  </button>
+</div>
+
+<div class="px-4 pb-24 pt-4 max-w-[1700px] mx-auto flex flex-col gap-5">
+
+<!-- ════════════════════════════════════════
+     TAB 1: SF6 HUB
+════════════════════════════════════════ -->
+<div class="tab-panel active" id="panel-hub">
+  <section class="card p-5 border border-purple-500/30 shadow-[inset_0_0_50px_rgba(168,85,247,0.04)] flex flex-col relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+    <div class="flex justify-between items-center mb-4 relative z-10">
+      <h3 class="text-sm font-black uppercase text-purple-400 flex items-center gap-2 tracking-wide">
+        <i data-lucide="cpu" class="w-5 h-5"></i> SF6 Smart Engine
+      </h3>
+      <input type="file" id="pdfFile" class="hidden" accept=".pdf" multiple onchange="processPDF(event)">
+      <button class="btn-main !bg-purple-600 hover:!bg-purple-500 !shadow-purple-600/30 py-2 px-5 text-xs" onclick="document.getElementById('pdfFile').click()">
+        <i data-lucide="file-text" class="w-4 h-4"></i> Upload SF6 PDF
+      </button>
+    </div>
+    <div class="flex flex-col lg:flex-row gap-5 items-stretch relative z-10">
+      <textarea id="pdfText" class="input-base flex-1 min-h-[300px] font-mono scrollbar-thin !bg-black/60 !border-purple-500/20 focus:!border-purple-500 text-purple-100 text-[11px]" placeholder="Paste Work Order texts here, or upload PDF files..."></textarea>
+      <div class="w-full lg:w-[650px] flex flex-col gap-3">
+        <div class="flex gap-2">
+          <button class="btn-main !bg-slate-600 hover:!bg-slate-500 flex-1 !shadow-none text-[10px]" onclick="analyzeText()">
+            <i data-lucide="scan-line" class="w-4 h-4"></i> Standard Parse
+          </button>
+          <button class="btn-main !bg-indigo-600 hover:!bg-indigo-500 flex-1 !shadow-indigo-600/30 text-[10px]" onclick="analyzeWithAI()">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> AI Smart Parse ✨
+          </button>
+          <button class="btn-main !bg-fuchsia-600 hover:!bg-fuchsia-500 flex-1 !shadow-fuchsia-600/30 text-[10px]" onclick="summarizeConfigWithAI()">
+            <i data-lucide="radio-tower" class="w-4 h-4"></i> RF Config ✨
+          </button>
+        </div>
+        <div id="status" class="bg-black/40 p-2 rounded-xl border border-purple-500/20 text-[10px] flex-1 flex flex-col items-center justify-center text-center font-bold text-purple-300 w-full overflow-hidden min-h-[250px] shadow-inner">
+          Awaiting input data to process...
+        </div>
       </div>
-      <div class="control-group">
-        <input type="text" id="searchInput" placeholder="Search..." style="flex:1; min-width:200px;">
-        <button id="searchBtn" class="button">Search</button>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB 2: CATALOG & BASKET
+════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-catalog">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+    <!-- CATALOG -->
+    <div class="card flex flex-col overflow-hidden border border-white/5">
+      <div class="p-4 bg-white/5 border-b border-white/5 flex flex-col gap-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-black text-gray-300 tracking-widest uppercase flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-red-500"></i> Technical Catalog</span>
+          <div class="flex gap-2 items-center">
+            <button class="shortcut-btn !bg-green-500/20 !text-green-400 !border-green-500 hover:!bg-green-500 hover:!text-white flex items-center gap-1" onclick="addAllToBasket(event)">
+              <i data-lucide="list-plus" class="w-3 h-3"></i> Add All
+            </button>
+            <input id="search" class="input-base w-44 !py-1.5" placeholder="Search catalog..." oninput="renderCatalog()">
+          </div>
+        </div>
+        <div id="blockButtons" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin mt-1"></div>
       </div>
-      <div id="scopeToggle" class="control-group">
-        <button data-scope="all" class="button active">All files</button>
-        <button data-scope="current" class="button">Current</button>
+      <div class="h-[450px] overflow-auto scrollbar-thin bg-black/20">
+        <table class="w-full text-left">
+          <thead class="bg-gray-900/90 backdrop-blur-md sticky top-0 z-10 shadow-md">
+            <tr class="text-gray-400 uppercase dyn-text-sm tracking-wider">
+              <th class="dyn-pad font-bold">Material #</th>
+              <th class="dyn-pad font-bold">Description</th>
+              <th class="dyn-pad text-center font-bold">Qty</th>
+            </tr>
+          </thead>
+          <tbody id="catalogBody" class="divide-y divide-white/5"></tbody>
+        </table>
       </div>
-      <div id="modeToggle" class="control-group">
-        <button data-mode="siteid" class="button active">Site ID</button>
-        <button data-mode="row" class="button">Full row</button>
+    </div>
+
+    <!-- BASKET -->
+    <div class="card flex flex-col overflow-hidden border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.08)] relative">
+      <div class="p-4 bg-blue-900/10 border-b border-blue-500/20 flex flex-wrap justify-between items-center gap-2">
+        <span class="text-xs font-black text-blue-400 tracking-widest uppercase flex items-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Draft MRN Basket</span>
+        <div class="flex gap-1.5 items-center flex-wrap">
+          <button class="btn-main !bg-orange-600 hover:!bg-orange-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="estimateLogisticsWithAI()">Logistics ✨</button>
+          <button class="btn-main !bg-cyan-600 hover:!bg-cyan-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="generateQAChecklistWithAI()">QA ✨</button>
+          <button class="btn-main !bg-yellow-600 hover:!bg-yellow-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="generateSiteAccessWithAI()">Access ✨</button>
+          <button class="btn-main !bg-rose-600 hover:!bg-rose-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="generateTroubleshootingWithAI()">Fixes ✨</button>
+          <button class="btn-main !bg-teal-600 hover:!bg-teal-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="draftEmailWithAI()">Email ✨</button>
+          <button class="btn-main !bg-pink-600 hover:!bg-pink-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="generateProjectPlanWithAI()">Plan ✨</button>
+          <button class="btn-main !bg-indigo-600 hover:!bg-indigo-500 !py-1 !px-2 !text-[10px] !shadow-none" onclick="validateBasketWithAI()">Validate ✨</button>
+          <input id="activeSiteId" class="input-base w-24 uppercase font-bold text-blue-300 !border-blue-500/30 focus:!border-blue-400 !py-1" placeholder="SITE ID">
+        </div>
+      </div>
+
+      <div class="bg-black/40 p-3 border-b border-white/5 grid grid-cols-3 md:grid-cols-6 gap-3">
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">Plant</label><input id="defPlant" class="input-base w-full !p-1.5 !text-[10px]" value="EGJV"></div>
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">Text</label><input id="defText" class="input-base w-full !p-1.5 !text-[10px]" value="TX-Project"></div>
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">Approver</label><input id="defApprover" class="input-base w-full !p-1.5 !text-[10px]" value="70474211"></div>
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">Receiver</label><input id="defReceiver" class="input-base w-full !p-1.5 !text-[10px]" value="26201647"></div>
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">Sloc</label><input id="defSloc" class="input-base w-full !p-1.5 !text-[10px]" value="0100"></div>
+        <div><label class="text-[9px] text-gray-500 uppercase font-black tracking-wider mb-1 block">WBS</label><input id="defWbs" class="input-base w-full !p-1.5 !text-[10px]" value="" placeholder="Optional"></div>
+      </div>
+
+      <div class="h-[385px] overflow-auto scrollbar-thin bg-black/20">
+        <table class="w-full text-left">
+          <thead class="bg-blue-950/80 backdrop-blur-md sticky top-0 z-10 shadow-md">
+            <tr class="text-blue-300 uppercase dyn-text-sm tracking-wider">
+              <th class="dyn-pad font-bold">Site ID</th>
+              <th class="dyn-pad font-bold">Material Description</th>
+              <th class="dyn-pad text-center font-bold">Qty</th>
+              <th class="dyn-pad text-center font-bold">Act</th>
+            </tr>
+          </thead>
+          <tbody id="basketBody" class="divide-y divide-white/5"></tbody>
+        </table>
+      </div>
+
+      <div class="p-3 bg-gray-900/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center rounded-b-xl">
+        <button class="text-red-400 text-[10px] font-black uppercase hover:text-red-300 hover:underline transition-colors flex items-center gap-1" onclick="clearBasket()"><i data-lucide="trash" class="w-3 h-3"></i> Wipe Basket</button>
+        <span id="counter" class="text-[10px] font-black text-blue-400 uppercase bg-blue-500/10 py-1 px-3 rounded-full border border-blue-500/20">Total Rows: 0</span>
       </div>
     </div>
-    <div style="margin: 1rem 0;">
-      <strong>Files:</strong> <span id="fileCount">0 files</span> | <strong>Total Rows:</strong> <span id="rowCount">0 rows</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB 3: MRN PDF GENERATOR
+════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-pdf">
+
+  <!-- SYNC NOTICE -->
+  <div class="flex items-center gap-3 bg-green-500/10 border border-green-500/25 rounded-xl p-3 mb-4 text-xs text-green-300 font-bold">
+    <i data-lucide="link" class="w-4 h-4 flex-shrink-0"></i>
+    <span>This PDF generator is synced with your basket above. Click <strong>"Sync Basket → PDF"</strong> to pull all current basket rows into the PDF builder, or add rows manually below.</span>
+    <button class="btn-main !bg-green-600 hover:!bg-green-500 ml-auto flex-shrink-0 !py-1.5 !px-3 !text-[10px]" onclick="syncBasketToPDF()">
+      <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Basket → PDF
+    </button>
+  </div>
+
+  <!-- MRN HEADER FIELDS -->
+  <div class="sec-label">MRN Header Information</div>
+  <div class="card p-5 mb-5">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+      <div class="pdf-field"><label>MRN Number</label><input id="pdf_mrn" placeholder="MRN-2024-001"/></div>
+      <div class="pdf-field"><label>Request Date</label><input id="pdf_date" type="date"/></div>
+      <div class="pdf-field"><label>Install Date</label><input id="pdf_install" type="date"/></div>
+      <div class="pdf-field"><label>Plant</label><input id="pdf_plant" value="EGJV"/></div>
+      <div class="pdf-field"><label>Sloc</label><input id="pdf_sloc" value="0100"/></div>
+      <div class="pdf-field"><label>WBS Element</label><input id="pdf_wbs" placeholder="Optional"/></div>
+      <div class="pdf-field"><label>MRN Approver ID</label><input id="pdf_approver" value="70474211"/></div>
+      <div class="pdf-field"><label>MRN Receiver ID</label><input id="pdf_receiver" value="26201647"/></div>
+      <div class="pdf-field"><label>Project Text</label><input id="pdf_text" value="TX-Project"/></div>
+      <div class="pdf-field"><label>Site Operator</label><input id="pdf_operator" value="PLATINUM"/></div>
+      <div class="pdf-field"><label>DP ID</label><input id="pdf_dp_id" value="400158105"/></div>
+      <div class="pdf-field"><label>Prepared By</label><input id="pdf_prepared" placeholder="Engineer name"/></div>
     </div>
-    <div style="margin: 1rem 0;">
-      <strong>Quick filters:</strong>
-      <span id="quickChips" style="display:flex; gap:0.3rem; flex-wrap:wrap;">
-        <span class="chip" data-chip="exact">Exact match</span>
-        <span class="chip" data-chip="contains">Contains</span>
-        <span class="chip active" data-chip="case">Case sensitive</span>
-      </span>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="pdf-field"><label>DP Address</label><input id="pdf_address" value="NASR CITY, CAIRO, EG"/></div>
+      <div class="pdf-field"><label>Special Instructions / Notes</label><textarea id="pdf_notes" placeholder="Any special instructions..."></textarea></div>
     </div>
-    <div style="margin: 1rem 0;">
-      <strong>Files:</strong>
-      <div id="fileList" class="file-list"></div>
+  </div>
+
+  <!-- IMPORT OPTIONS -->
+  <div class="sec-label">Add / Import Materials</div>
+  <div class="card p-5 mb-5">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+
+      <!-- JSON paste -->
+      <div class="bg-black/30 rounded-xl p-4 border border-white/5">
+        <p class="text-[10px] font-black uppercase text-purple-400 tracking-widest mb-2 flex items-center gap-2"><i data-lucide="clipboard" class="w-3 h-3"></i> Paste JSON from Hub</p>
+        <p class="text-[10px] text-gray-500 font-mono mb-3">In browser console (F12): <span class="text-red-400">copy(JSON.stringify(basket))</span> then paste below:</p>
+        <textarea id="pdf_json_paste" class="input-base w-full text-[11px] font-mono !rounded-xl min-h-[70px] scrollbar-thin" placeholder='[{"materialNumber":"301205784","description":"RF CABLE-5D","defaultQty":300,"siteId":"SITE01"}]'></textarea>
+        <button class="btn-main !bg-purple-600 !shadow-none mt-2 !py-1.5 !text-[10px]" onclick="pdfImportJSON()"><i data-lucide="download" class="w-3 h-3"></i> Import JSON</button>
+      </div>
+
+      <!-- CSV import -->
+      <div class="bg-black/30 rounded-xl p-4 border border-white/5">
+        <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2 flex items-center gap-2"><i data-lucide="file" class="w-3 h-3"></i> Import CSV File</p>
+        <p class="text-[10px] text-gray-500 font-mono mb-3">Columns: siteId, materialNumber, description, qty</p>
+        <div class="import-zone">
+          <input type="file" accept=".csv,.txt" onchange="pdfImportCSV(event)">
+          <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto mb-2 text-gray-500"></i>
+          <p class="text-[11px] text-gray-400 font-bold">Drop CSV here or click to browse</p>
+        </div>
+      </div>
     </div>
-    <div style="margin: 1rem 0;">
-      <strong>Theme:</strong> <span id="themeRow" style="display:flex; gap:0.5rem;">
-        <span class="theme-pill active" data-theme="dark">Dark</span>
-        <span class="theme-pill" data-theme="light">Light</span>
-      </span>
+
+    <!-- Manual entry -->
+    <div class="sec-label" style="margin-bottom:10px;">Manual Row Entry</div>
+    <div class="row-add-grid">
+      <div>
+        <label class="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block font-bold font-mono">Site ID</label>
+        <input id="pe_site" class="input-base w-full !text-[11px]" placeholder="CAI001"/>
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block font-bold font-mono">Description</label>
+        <input id="pe_desc" class="input-base w-full !text-[11px]" placeholder="RF CABLE-5D, ODU 23G..."/>
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block font-bold font-mono">Material #</label>
+        <input id="pe_mat" class="input-base w-full !text-[11px] font-mono" placeholder="301205784"/>
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block font-bold font-mono">Qty</label>
+        <input id="pe_qty" type="number" class="input-base w-full !text-[11px]" placeholder="1" min="1"/>
+      </div>
+      <button class="btn-main !bg-green-600 !shadow-green-600/30 whitespace-nowrap" onclick="pdfAddRow()">+ Add Row</button>
     </div>
-    <div style="margin: 1rem 0;">
-      <label>Font Family: <select id="fontSelect" style="width:200px;"><option value="system-ui">System UI</option><option value="Georgia">Georgia</option><option value="monospace">Monospace</option></select></label>
-      <label style="margin-left:1rem;">Font Size: <input id="fontSizeRange" type="range" min="12" max="18" value="14" style="width:100px;"></label>
-    </div>
-    <div id="activeFilters" style="margin: 1rem 0;">
-      <strong>Active filters:</strong> <div style="display:flex; gap:0.3rem; flex-wrap:wrap;"></div>
-    </div>
-    <div style="overflow-x:auto; margin-top: 1rem;">
-      <table>
-        <thead id="tableHead"></thead>
-        <tbody id="tableBody"></tbody>
+  </div>
+
+  <!-- PDF BASKET TABLE -->
+  <div class="sec-label">PDF Material Rows</div>
+
+  <!-- STATS -->
+  <div id="pdf-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4" style="display:none!important;">
+    <div class="pdf-stat-card"><div class="pdf-stat-val text-red-400" id="ps-rows">0</div><div class="pdf-stat-lbl">Total Rows</div></div>
+    <div class="pdf-stat-card"><div class="pdf-stat-val text-blue-400" id="ps-sites">0</div><div class="pdf-stat-lbl">Sites</div></div>
+    <div class="pdf-stat-card"><div class="pdf-stat-val text-green-400" id="ps-qty">0</div><div class="pdf-stat-lbl">Total Items</div></div>
+    <div class="pdf-stat-card"><div class="pdf-stat-val text-yellow-400" id="ps-mats">0</div><div class="pdf-stat-lbl">Material Types</div></div>
+  </div>
+
+  <div class="card overflow-hidden mb-5">
+    <div class="pdf-table-wrap">
+      <table class="pdf-table" id="pdf-data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Site ID</th><th>Material #</th><th>Description</th>
+            <th>Qty</th><th>UoM</th><th>Plant</th><th>Sloc</th><th>WBS</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="pdf-tbody">
+          <tr id="pdf-empty"><td colspan="10" class="text-center py-12 text-gray-600">
+            <div class="text-3xl mb-2">📦</div>
+            <div class="text-sm font-bold">No materials yet — sync your basket or add rows manually</div>
+          </td></tr>
+        </tbody>
       </table>
     </div>
-    <div class="status-bar">
-      <span id="statusText">Ready...</span> | <span id="selectionText">0 matches</span>
-      <a href="#" id="hostInfoLink" style="margin-left:1rem; color:#007bff; cursor:pointer;">About hosting</a>
+    <div class="p-3 border-t border-white/5 flex items-center gap-3 flex-wrap" style="background:rgba(0,0,0,0.3);">
+      <button class="btn-main !bg-slate-700 !shadow-none !py-1.5 !text-[10px]" onclick="pdfClearAll()"><i data-lucide="trash-2" class="w-3 h-3"></i> Clear All</button>
+      <span id="pdf-counter" class="text-[10px] font-black text-blue-400 bg-blue-500/10 py-1 px-3 rounded-full border border-blue-500/20 ml-auto">0 rows</span>
     </div>
   </div>
-  <div id="hostModal" class="modal" data-close>
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <h2>About GitHub Pages Hosting</h2>
-      <p>This application is hosted on GitHub Pages. All CSV files are loaded directly from the repository.</p>
-      <p>No re-uploading needed! Just commit changes to the CSV files and they'll be live.</p>
-      <button class="button" data-close>Close</button>
-    </div>
+
+  <!-- GENERATE BUTTONS -->
+  <div class="sec-label">Generate Output</div>
+  <div class="card p-5 flex gap-3 flex-wrap items-center">
+    <button class="btn-main !bg-red-600 !shadow-red-600/30" onclick="generateMRNPDF()">
+      <i data-lucide="file-down" class="w-4 h-4"></i> Generate MRN PDF
+    </button>
+    <button class="btn-main !bg-blue-600 !shadow-blue-600/30" onclick="previewMRNPDF()">
+      <i data-lucide="eye" class="w-4 h-4"></i> Preview PDF
+    </button>
+    <button class="btn-main !bg-green-600 !shadow-green-600/30" onclick="pdfExportCSV()">
+      <i data-lucide="table" class="w-4 h-4"></i> Export CSV
+    </button>
+    <button class="btn-main !bg-orange-500 !shadow-orange-500/30" onclick="exportMRN()">
+      <i data-lucide="download" class="w-4 h-4"></i> Export XLSX (35-col)
+    </button>
+    <span class="ml-auto text-[10px] text-gray-500 font-mono">A4 Landscape PDF · Professional Vodafone Format</span>
   </div>
-  <div id="detailsModal" class="modal" data-close>
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <h2 id="detailsTitle"></h2>
-      <div id="detailsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin:1rem 0;"></div>
+
+</div><!-- end panel-pdf -->
+
+</div><!-- end main container -->
+
+<!-- ════════════════════════════════════════
+     SETTINGS MODAL
+════════════════════════════════════════ -->
+<div id="settingsOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
+  <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+    <h3 class="text-white font-bold mb-6 flex items-center gap-2 text-lg"><i data-lucide="sliders" class="w-5 h-5 text-blue-400"></i> UI Preferences</h3>
+    <div class="flex flex-col gap-6">
       <div>
-        <label>Note:<br><textarea id="detailsNote" style="width:100%; height:120px; padding:0.5rem; border:1px solid var(--border); border-radius:4px; background:var(--bg-secondary); color:var(--text-primary);"></textarea></label>
+        <label class="text-xs text-gray-400 font-bold uppercase flex justify-between mb-3 tracking-wider"><span>Font Size</span><span id="fontSizeVal" class="text-white bg-gray-800 px-2 py-0.5 rounded">11px</span></label>
+        <input type="range" id="fontSizeSlider" min="8" max="16" value="11" class="w-full accent-blue-500 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateSettings()">
       </div>
-      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-        <button id="detailsSave" class="button">Save note</button>
-        <button id="detailsClear" class="button">Clear</button>
-        <button class="button" data-close>Close</button>
+      <div>
+        <label class="text-xs text-gray-400 font-bold uppercase flex justify-between mb-3 tracking-wider"><span>Table Padding</span><span id="padSizeVal" class="text-white bg-gray-800 px-2 py-0.5 rounded">8px</span></label>
+        <input type="range" id="padSizeSlider" min="2" max="16" value="8" class="w-full accent-blue-500 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateSettings()">
+      </div>
+      <div>
+        <label class="text-xs text-gray-400 font-bold uppercase block mb-2 tracking-wider">Font Style</label>
+        <select id="fontFamilySelect" class="input-base w-full text-sm !bg-gray-800" onchange="updateSettings()">
+          <option value="'Syne', system-ui, sans-serif">Syne (Default)</option>
+          <option value="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">Monospace</option>
+          <option value="Georgia, Cambria, 'Times New Roman', serif">Classic Serif</option>
+          <option value="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Standard Sans</option>
+        </select>
       </div>
     </div>
+    <div class="flex justify-end pt-6 mt-6 border-t border-gray-800">
+      <button class="btn-main !bg-blue-600 w-full" onclick="document.getElementById('settingsOverlay').classList.add('hidden')">Apply & Close</button>
+    </div>
   </div>
-  <script src="site-master-core.js"></script>
+</div>
+
+<!-- AI RESPONSE MODAL -->
+<div id="aiResponseOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
+  <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-3xl flex flex-col gap-4 shadow-2xl">
+    <h3 class="text-white font-bold flex items-center gap-2 text-lg">
+      <i id="aiModalIcon" data-lucide="sparkles" class="text-blue-400"></i>
+      <span id="aiModalTitle">AI Response</span>
+    </h3>
+    <div id="aiModalContent" class="text-gray-300 text-sm h-[60vh] overflow-y-auto p-5 bg-black/50 rounded-xl border border-gray-800 whitespace-pre-wrap font-mono leading-relaxed shadow-inner scrollbar-thin">Generating...</div>
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-800">
+      <button class="btn-main !bg-slate-700" onclick="document.getElementById('aiResponseOverlay').classList.add('hidden')">Close</button>
+      <button class="btn-main !bg-blue-600" onclick="copyAiContent()"><i data-lucide="copy" class="w-4 h-4"></i> Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT WIDGET -->
+<div class="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+  <div id="ai-chat-widget" class="hidden mb-4 w-80 sm:w-96 bg-gray-900 border border-gray-700 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-[400px]">
+    <div class="bg-gradient-to-r from-red-600 to-red-900 p-3 flex justify-between items-center border-b border-gray-700">
+      <span class="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider"><i data-lucide="bot" class="w-4 h-4"></i> AI Assistant</span>
+      <button onclick="toggleChat()" class="text-white/70 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 text-xs scrollbar-thin bg-black/30">
+      <div class="chat-bubble-ai p-3 rounded-xl text-gray-200">Hello! I'm your AI assistant. Ask me anything about telecom materials, site configurations, or MRN workflows!</div>
+    </div>
+    <div class="p-3 bg-gray-900 border-t border-gray-800 flex gap-2">
+      <input type="text" id="chat-input" class="input-base flex-1 !rounded-full !px-4" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+      <button class="btn-main !bg-blue-600 !rounded-full !w-10 !h-10 !p-0 !flex-shrink-0" onclick="sendChatMessage()"><i data-lucide="send" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+  <button onclick="toggleChat()" class="bg-gradient-to-tr from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white w-14 h-14 rounded-full shadow-[0_0_20px_rgba(255,0,0,0.4)] hover:scale-110 transition-transform flex items-center justify-center border border-red-400/30">
+    <i data-lucide="message-square-dashed" class="w-6 h-6"></i>
+  </button>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+lucide.createIcons();
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+const apiKey = "";
+
+// ─── TABS ───
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  lucide.createIcons();
+}
+
+// ─── TOAST ───
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.className = `show ${type}`;
+  el.innerHTML = (type === 'success' ? '✅' : '❌') + ' ' + msg;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ─── SETTINGS ───
+function saveSettingsToStorage() {
+  const s = {
+    fontSize: document.getElementById('fontSizeSlider').value,
+    padSize: document.getElementById('padSizeSlider').value,
+    fontFamily: document.getElementById('fontFamilySelect').value,
+    plant: document.getElementById('defPlant').value,
+    text: document.getElementById('defText').value,
+    approver: document.getElementById('defApprover').value,
+    receiver: document.getElementById('defReceiver').value,
+    sloc: document.getElementById('defSloc').value
+  };
+  localStorage.setItem('mrn_hub_settings', JSON.stringify(s));
+}
+function loadSettingsFromStorage() {
+  const saved = localStorage.getItem('mrn_hub_settings');
+  if (!saved) return;
+  const s = JSON.parse(saved);
+  if(s.fontSize) document.getElementById('fontSizeSlider').value = s.fontSize;
+  if(s.padSize) document.getElementById('padSizeSlider').value = s.padSize;
+  if(s.fontFamily) document.getElementById('fontFamilySelect').value = s.fontFamily;
+  if(s.plant) document.getElementById('defPlant').value = s.plant;
+  if(s.text) document.getElementById('defText').value = s.text;
+  if(s.approver) document.getElementById('defApprover').value = s.approver;
+  if(s.receiver) document.getElementById('defReceiver').value = s.receiver;
+  if(s.sloc) document.getElementById('defSloc').value = s.sloc;
+  updateSettings(false);
+}
+function updateSettings(save = true) {
+  const fs = document.getElementById('fontSizeSlider').value;
+  const pad = document.getElementById('padSizeSlider').value;
+  const ff = document.getElementById('fontFamilySelect').value;
+  document.getElementById('fontSizeVal').textContent = fs + 'px';
+  document.getElementById('padSizeVal').textContent = pad + 'px';
+  document.documentElement.style.setProperty('--dynamic-text', fs + 'px');
+  document.documentElement.style.setProperty('--dynamic-pad', pad + 'px');
+  document.documentElement.style.setProperty('--app-font', ff);
+  if(save) saveSettingsToStorage();
+}
+['defPlant','defText','defApprover','defReceiver','defSloc'].forEach(id => {
+  document.getElementById(id).addEventListener('input', saveSettingsToStorage);
+});
+
+// ─── BASKET STATE ───
+function saveBasketToStorage() { localStorage.setItem('mrn_hub_basket', JSON.stringify(basket)); }
+let basket = JSON.parse(localStorage.getItem('mrn_hub_basket')) || [];
+
+// ─── AI RETRY ───
+async function fetchWithRetry(url, options, retries = 5) {
+  const delays = [1000,2000,4000,8000,16000];
+  for (let i = 0; i < retries; i++) {
+    try {
+      const r = await fetch(url, options);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } catch(e) {
+      if (i === retries-1) throw e;
+      await new Promise(r => setTimeout(r, delays[i]));
+    }
+  }
+}
+
+// ════════════════════════════════
+// BLOCK TABLES DATA
+// ════════════════════════════════
+const BLOCK_TABLES = {
+  "A21D03MAC-3NX":[
+    {siteId:"",block:"LINK 21- 30",band:"",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"LINK 21- 30",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4},
+    {siteId:"",block:"LINK 21- 30",band:"",materialNumber:"301465196",description:"21 XMC-3 ODU 23G Low Band A",defaultQty:2},
+    {siteId:"",block:"LINK 21- 30",band:"",materialNumber:"301465244",description:"21 XMC-3 ODU 23G High Band A",defaultQty:2},
+    {siteId:"",block:"LINK 21- 30",band:"",materialNumber:"301693067",description:"A23D03MAC-3NX",defaultQty:2},
+    {siteId:"",block:"IN-DOOR",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"IN-DOOR",materialNumber:"301635196",description:"ISM8",defaultQty:1}
+  ],
+  "A21D06MAC-3NX":[
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301693084",description:"A23D06MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301465196",description:"XMC-3 ODU 23G Low_Band A",defaultQty:2},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301465244",description:"XMC-3 ODU 23G High_Band A",defaultQty:2},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301635196",description:"ISM8",defaultQty:1},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 21 - 60",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4}
+  ],
+  "A23D03MAC-3NX":[
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301805638",description:"SPLITMOUNT 2+0 STEP with IM 905",defaultQty:1},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301788619",description:"XMC-3E 23G,A, Low",defaultQty:2},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301788230",description:"XMC-3E 23G,A, High",defaultQty:2},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301650593",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301693067",description:"A23D03MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 23 - 30",band:"",materialNumber:"301635196",description:"ISM8",defaultQty:1}
+  ],
+  "A23D06MAC-3NX":[
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301805638",description:"SPLITMOUNT 2+0 STEP with IM 905",defaultQty:1},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301788619",description:"XMC-3E 23G,A, Low",defaultQty:2},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301788230",description:"XMC-3E 23G,A, High",defaultQty:2},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301650593",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301693084",description:"A23D06MAC-3NX",defaultQty:2}
+  ],
+  "A26D03MAC-3NX":[
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301259290",description:"IF/ODU Installation Accessories(5D)",defaultQty:4},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301693065",description:"MWA_A26D03MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301730576",description:"ODU(XMC-3E) 26G A/B H",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301730584",description:"ODU(XMC-3E) 26G A/B L",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"BAND 26 - 30",band:"",materialNumber:"301805637",description:"Big Nodal with Installation materials",defaultQty:1}
+  ],
+  "A26D06MAC-3NX":[
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301259290",description:"IF/ODU Installation Accessories(5D)",defaultQty:4},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301693085",description:"A26D06MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301730576",description:"ODU(XMC-3E) 26G A/B H",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301730584",description:"ODU(XMC-3E) 26G A/B L",defaultQty:2},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"BAND 26 - 60",band:"",materialNumber:"301805637",description:"Big Nodal with Installation materials",defaultQty:1}
+  ],
+  "A32D03MAC-3NX":[
+    {siteId:"",block:"BAND 32- 30",band:"32G",materialNumber:"301693115",description:"MWA_A32D03MAC-3NX",defaultQty:1},
+    {siteId:"",block:"BAND 32- 30",band:"32G",materialNumber:"301788662",description:"ODUXMC-32G-3EL",defaultQty:2},
+    {siteId:"",block:"BAND 32- 30",band:"32G",materialNumber:"301788650",description:"ODUXMC-32G-3EH",defaultQty:2},
+    {siteId:"",block:"BAND 32- 30",band:"32G",materialNumber:"301650593",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 32 - 30",band:"32",materialNumber:"301805638",description:"SPLITMOUNT 2+0 STEP with IM 905",defaultQty:1},
+    {siteId:"",block:"BAND 32 - 30",band:"32",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4}
+  ],
+  "A32D06MAC-3NX":[
+    {siteId:"",block:"BAND 32- 60",band:"32G",materialNumber:"301693079",description:"A32D06MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 32- 60",band:"32G",materialNumber:"301788662",description:"ODUXMC-32G-3EL",defaultQty:2},
+    {siteId:"",block:"BAND 32- 60",band:"32G",materialNumber:"301788650",description:"ODUXMC-32G-3EH",defaultQty:2},
+    {siteId:"",block:"BAND 32- 60",band:"32G",materialNumber:"301650593",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301805638",description:"SPLITMOUNT 2+0 STEP with IM 905",defaultQty:1},
+    {siteId:"",block:"BAND 23 - 60",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4}
+  ],
+  "A38D03MAC-3NX":[
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:2},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301693090",description:"A38D03MAC-3NX",defaultQty:2},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301468934",description:"MICROWAVE ODU,RTN XMC-3,38G,A,LOW",defaultQty:2},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301468953",description:"MICROWAVE ODU,RTN XMC-3,38G,A,HIGH",defaultQty:2},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301635196",description:"ISM8",defaultQty:1},
+    {siteId:"",block:"BAND 38 -30",band:"",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:200}
+  ],
+  "A38D06MAC-3NX":[
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301205784",description:"RF CABLE-5D",defaultQty:300},
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301259290",description:"IFODU-5D01",defaultQty:4},
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301805638",description:"SPLITMOUNT20STEP with IM",defaultQty:1},
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301468953",description:"MICROWAVE ODU,RTN XMC-3,38G,A,HIGH",defaultQty:1},
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301468934",description:"MICROWAVE ODU,RTN XMC-3,38G,A,LOW",defaultQty:1},
+    {siteId:"",block:"BAND 38 -Size 60",band:"38G",materialNumber:"301693076",description:"MWA_A38D06MAC-3NX",defaultQty:2}
+  ],
+  "A80S03MAC-3NX":[
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301693152",description:"A80S03MAC-3NX",defaultQty:2},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301853314",description:"E-Band Low End LEAP_low",defaultQty:1},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301853331",description:"E-Band Low End LEAP_High",defaultQty:1},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301842798",description:"E-BAND_DLC/UPC-DLC/UPC_SM_70m_Outdoor_FO",defaultQty:2},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301712390",description:"C2586BK01",defaultQty:150},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301843122",description:"E-BAND_Symmetry_Twist_Cable_per_meter",defaultQty:300},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301583838",description:"Connector_RTN310",defaultQty:2},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301842333",description:"E_Band_SLEPWPRCK1",defaultQty:2},
+    {siteId:"",block:"EB MRN 1+0 Single",band:"E-BAND",materialNumber:"301878854",description:"SFP 1G SM",defaultQty:4}
+  ],
+  "A80D06MAC-3NX":[
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301842798",description:"E-BAND_DLC/UPC-DLC/UPC_SM_70m_Outdoor_FO",defaultQty:4},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301583838",description:"Connector_RTN310",defaultQty:4},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301693153",description:"A80D06MAC-3NX",defaultQty:2},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301842333",description:"E_Band_SLEPWPRCK1",defaultQty:4},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301717017",description:"EBAND XPIC Cable",defaultQty:2},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301843122",description:"E-BAND_Symmetry_Twist_Cable_per_meter",defaultQty:300},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301853331",description:"E-Band Low End LEAP_High",defaultQty:2},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301853314",description:"E-Band Low End LEAP_low",defaultQty:2},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301712390",description:"Power Cable 600V UL2586",defaultQty:300},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301862709",description:"SFP 1.25G SM 10KM-1310",defaultQty:4},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301843535",description:"10GE,10KM",defaultQty:6},
+    {siteId:"",block:"EB MRN 2+0 XPIC",band:"E-BAND",materialNumber:"301539178",description:"SFP+ SM 10.3Gb/s 1.4km 1310nm",defaultQty:6}
+  ],
+  "RTN_6900_905":[
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301783512",description:"MCW_JFODU5DX502",defaultQty:8},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301805638",description:"CCA_SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301864238",description:"CCA_CRFORG22300",defaultQty:8},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301864239",description:"MCW_MLIDU-ACCESSORIES00",defaultQty:1},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301864282",description:"CAP_CPWR101000",defaultQty:1},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301864283",description:"MCW_BOM",defaultQty:1},
+    {siteId:"",block:"RTN_6900_ISM8_PLANT_TP",band:"",materialNumber:"301869847",description:"MCW_JSM10+SMSa+IF Lic",defaultQty:1}
+  ],
+  "RTN_INDOOR":[
+    {siteId:"",block:"RTN_INDOOR",band:"IDU",materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM 905",defaultQty:1},
+    {siteId:"",block:"RTN_INDOOR",band:"IDU",materialNumber:"301805637",description:"Big Nodal with Installation materials 950",defaultQty:1},
+    {siteId:"",block:"RTN_INDOOR",band:"IDU",materialNumber:"301808113",description:"RTN980 with 2*CSHNU and IM 980",defaultQty:1},
+    {siteId:"",block:"RTN_INDOOR",band:"ISM8_LE",materialNumber:"301635196",description:"ISM8_LE",defaultQty:1}
+  ],
+  "All Material":[
+    {materialNumber:"301685797",description:"MWA_A13D12MAC-3NX",defaultQty:1},
+    {materialNumber:"301693065",description:"MWA_A26D03MAC-3NX",defaultQty:1},
+    {materialNumber:"301693067",description:"MWA_A23D03MAC-3NX",defaultQty:1},
+    {materialNumber:"301693076",description:"MWA_A38D06MAC-3NX",defaultQty:1},
+    {materialNumber:"301693079",description:"MWA_A32D06MAC-3NX",defaultQty:1},
+    {materialNumber:"301693084",description:"MWA_A23D06MAC-3NX",defaultQty:1},
+    {materialNumber:"301693085",description:"MWA_A26D06MAC-3NX",defaultQty:1},
+    {materialNumber:"301693090",description:"MWA_A38D03MAC-3NX",defaultQty:1},
+    {materialNumber:"301693115",description:"MWA_A32D03MAC-3NX",defaultQty:1},
+    {materialNumber:"301693133",description:"MWA_A10WD12MAC-3NX",defaultQty:1},
+    {materialNumber:"301693152",description:"MWA_A80S03MAC-3NX",defaultQty:1},
+    {materialNumber:"301693153",description:"MWA_A80D06MAC-3NX",defaultQty:1},
+    {materialNumber:"301693154",description:"MWA_A80S06MAC-3NX",defaultQty:1},
+    {materialNumber:"301259290",description:"MCW_IFODU-5D01",defaultQty:1},
+    {materialNumber:"301465196",description:"MCW_XMC-3 ODU 23G LOW_BAND A",defaultQty:1},
+    {materialNumber:"301465244",description:"MCW_XMC-3 ODU 23G HIGH_BAND A",defaultQty:1},
+    {materialNumber:"301635196",description:"MCW_ISM8",defaultQty:1},
+    {materialNumber:"301712390",description:"MCW_C2586BK01",defaultQty:1},
+    {materialNumber:"301805638",description:"SPLITMOUNT_2+0_STEP with IM",defaultQty:1},
+    {materialNumber:"301843122",description:"E-BAND_Symmetry_Twist_Cable",defaultQty:1},
+    {materialNumber:"301843535",description:"SFP_10GE,10KM",defaultQty:1},
+    {materialNumber:"301862709",description:"SFP_SFP 1.25G SM 10KM-1310",defaultQty:1},
+    {materialNumber:"301878854",description:"SFP_SFP 1G SM",defaultQty:1},
+    {materialNumber:"301876662",description:"S5335-L10T4X-D-V2 (DCN LAN SW)",defaultQty:1}
+  ]
+};
+
+let currentBlock = "A23D06MAC-3NX";
+
+// ─── BLOCK AUTO-MATCH ───
+function getBlockName(band, size, prot) {
+  const b = String(band||"").trim();
+  const s = String(size||"").trim();
+  const p = String(prot||"").trim().toUpperCase();
+  if(b==="80") return p.includes("2+0") ? "A80D06MAC-3NX" : "A80S03MAC-3NX";
+  if(b==="23"&&(s.includes("0.6")||s==="60"||s==="0.6m")) return "A23D06MAC-3NX";
+  if(b==="38"&&(s.includes("0.3")||s==="30"||s==="0.3m")) return "A38D03MAC-3NX";
+  if(b==="26"&&(s.includes("0.6")||s==="60"||s==="0.6m")) return "A26D06MAC-3NX";
+  if(b==="23") return "A23D03MAC-3NX";
+  if(b==="38") return "A38D06MAC-3NX";
+  if(b==="32") return "A32D06MAC-3NX";
+  if(b==="26") return "A26D03MAC-3NX";
+  if(b==="21") return "A21D03MAC-3NX";
+  return null;
+}
+
+// ─── CATALOG RENDER ───
+function renderBlockButtons() {
+  const container = document.getElementById('blockButtons');
+  container.innerHTML = "";
+  Object.keys(BLOCK_TABLES).forEach(k => {
+    const b = document.createElement('button');
+    b.className = `shortcut-btn ${k===currentBlock?'active-block':''}`;
+    b.textContent = k;
+    b.onclick = () => { currentBlock=k; renderBlockButtons(); renderCatalog(); };
+    container.appendChild(b);
+  });
+}
+
+function renderCatalog() {
+  const term = document.getElementById('search').value.toLowerCase();
+  const body = document.getElementById('catalogBody');
+  const data = BLOCK_TABLES[currentBlock] || [];
+  body.innerHTML = data.filter(i =>
+    (i.materialNumber||"").toLowerCase().includes(term) ||
+    (i.description||"").toLowerCase().includes(term)
+  ).slice(0,150).map(i => `
+    <tr class="hover:bg-red-500/10 cursor-pointer transition-colors" onclick='addToBasket(${JSON.stringify(i).replace(/'/g,"&#39;")})'>
+      <td class="dyn-pad font-black text-red-400 dyn-text font-mono">${i.materialNumber}</td>
+      <td class="dyn-pad">
+        <div class="font-bold text-gray-200 dyn-text">${i.description}</div>
+        ${i.siteId?`<div class="dyn-text-sm text-green-400">Loc: ${i.siteId}</div>`:''}
+      </td>
+      <td class="dyn-pad text-center font-black text-green-400 dyn-text">${i.defaultQty}</td>
+    </tr>
+  `).join('');
+}
+
+function addToBasket(item) {
+  const sId = document.getElementById('activeSiteId').value.trim().toUpperCase() || item.siteId || "TBD";
+  basket.push({...item, siteId: sId});
+  renderBasket();
+}
+
+function addAllToBasket(e) {
+  const term = document.getElementById('search').value.toLowerCase();
+  const data = BLOCK_TABLES[currentBlock] || [];
+  const filtered = data.filter(i =>
+    (i.materialNumber||"").toLowerCase().includes(term) ||
+    (i.description||"").toLowerCase().includes(term)
+  ).slice(0,150);
+  if(!filtered.length) return alert("No items to add!");
+  const sId = document.getElementById('activeSiteId').value.trim().toUpperCase() || "TBD";
+  filtered.forEach(item => basket.push({...item, siteId: sId}));
+  renderBasket();
+  if(e&&e.currentTarget){
+    const btn = e.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML='✔ Added!';
+    setTimeout(()=>{btn.innerHTML=orig;lucide.createIcons();},1500);
+  }
+}
+
+function addSpecificKit(bandStr, protStr, targetSiteId, e, specificSize=null) {
+  let autoBlock = getBlockName(bandStr, specificSize, protStr);
+  if(!autoBlock||!BLOCK_TABLES[autoBlock]) autoBlock = Object.keys(BLOCK_TABLES)[0];
+  const data = BLOCK_TABLES[autoBlock] || [];
+  const sId = targetSiteId || document.getElementById('activeSiteId').value.trim().toUpperCase() || "TBD";
+  data.forEach(item => basket.push({...item, siteId: sId}));
+  renderBasket();
+  if(e&&e.currentTarget){
+    const btn=e.currentTarget;
+    const orig=btn.innerHTML;
+    btn.innerHTML='✔ Added!';
+    setTimeout(()=>{btn.innerHTML=orig;lucide.createIcons();},1500);
+  }
+}
+
+function renderBasket() {
+  const body = document.getElementById('basketBody');
+  body.innerHTML = basket.map((item, idx) => `
+    <tr class="hover:bg-blue-500/10 border-b border-white/5 transition-colors">
+      <td class="dyn-pad font-black text-blue-300 uppercase">
+        <input class="transparent-input w-24 dyn-text" value="${item.siteId}" onchange="basket[${idx}].siteId=this.value;saveBasketToStorage();">
+      </td>
+      <td class="dyn-pad">
+        <div class="dyn-text-sm text-gray-400 font-mono">${item.materialNumber}</div>
+        <div class="font-bold uppercase truncate w-52 dyn-text text-gray-100" title="${item.description}">${item.description}</div>
+      </td>
+      <td class="dyn-pad text-center text-yellow-400 font-bold">
+        <input type="number" class="transparent-input w-12 text-center dyn-text" value="${item.defaultQty}" onchange="basket[${idx}].defaultQty=this.value;saveBasketToStorage();">
+      </td>
+      <td class="dyn-pad text-center">
+        <button class="text-red-500 hover:text-red-300 hover:scale-110 transition-transform" onclick="basket.splice(${idx},1);renderBasket()"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('counter').textContent = `Total Rows: ${basket.length}`;
+  lucide.createIcons();
+  saveBasketToStorage();
+}
+
+function clearBasket() {
+  basket = []; renderBasket();
+  localStorage.removeItem('mrn_hub_basket');
+}
+
+// ─── EXCEL DB ───
+function processExcel(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(ws);
+    const liveData = [];
+    json.forEach(row => {
+      const matCode = row["Material"]||row["Material_Code"]||row["Material Code"];
+      const desc = row["TP Description"]||row["Material_Description"]||row["Description"];
+      const qty = row["Qty"]||row["Quantity"];
+      const site = row["Location"]||row["Site_ID"];
+      if(matCode) liveData.push({materialNumber:String(matCode),description:String(desc||"N/A"),defaultQty:Number(qty||0),siteId:site||""});
+    });
+    BLOCK_TABLES["🔥 EXCEL DATABASE"] = liveData;
+    alert(`Loaded ${liveData.length} records!`);
+    currentBlock = "🔥 EXCEL DATABASE";
+    renderBlockButtons(); renderCatalog();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── PDF UPLOAD ───
+async function processPDF(event) {
+  const files = event.target.files;
+  if(!files||!files.length) return;
+  const statusDiv = document.getElementById('status');
+  statusDiv.classList.add('items-center','justify-center','p-2');
+  statusDiv.classList.remove('items-start','justify-start','p-0','bg-transparent','border-0');
+  statusDiv.innerHTML = `<span class="loading-pulse text-purple-400">Reading ${files.length} PDF file(s)...</span>`;
+  try {
+    let combinedText = "";
+    for(let f=0;f<files.length;f++){
+      const file = files[f];
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+      let extracted = `=== START OF DOCUMENT: ${file.name} ===\n`;
+      for(let i=1;i<=pdf.numPages;i++){
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        extracted += content.items.map(it=>it.str).join(" ")+"\n";
+      }
+      extracted += `\n=== END OF DOCUMENT ===\n\n`;
+      combinedText += extracted;
+    }
+    document.getElementById('pdfText').value = combinedText;
+    statusDiv.innerHTML = `<span class="text-green-400">Extracted ${files.length} file(s)! Click AI Smart Parse ✨ or Standard Parse.</span>`;
+  } catch(err) {
+    statusDiv.innerHTML = `<span class="text-red-500">Failed to read PDF(s). Paste text manually.</span>`;
+  }
+}
+
+// ─── STANDARD PARSE ───
+function analyzeText() {
+  const fullText = document.getElementById('pdfText').value;
+  if(!fullText.trim()) return alert("Please upload or paste text first.");
+  const statusDiv = document.getElementById('status');
+  statusDiv.classList.add('items-center','justify-center','p-2');
+  let chunks = fullText.split(/=== START OF DOCUMENT.*?===/g).filter(t=>t.trim().length>0);
+  if(!chunks.length) chunks = [fullText];
+  const results = chunks.map(text => {
+    let lrId="N/A",endA="N/A",endB="N/A",band="N/A",protection="N/A",supplier="N/A",creationDate="N/A";
+    let dishB="N/A",dishA="N/A",sizeB="N/A",sizeA="N/A",oduB="N/A",oduA="N/A",magB="N/A",magA="N/A",mmuB="N/A",mmuA="N/A",freqB="N/A",freqA="N/A",mmuIdB="N/A",mmuIdA="N/A",notes="N/A";
+    const lrMatch=text.match(/LR\/ID\s*([a-zA-Z0-9-]+)/i); if(lrMatch) lrId=lrMatch[1].replace(/-$/,'');
+    const dateMatch=text.match(/(?:Creation Date|Date)[^\d]*(\d{2}[-/.]\d{2}[-/.]\d{2,4})/i); if(dateMatch) creationDate=dateMatch[1];
+    const bandMatch=text.match(/Band[^\d]*?(11|13|15|18|23|26|38|80)G?\b/i); if(bandMatch) band=bandMatch[1];
+    const suppMatch=text.match(/Supplier\s*([a-zA-Z]+)/i); if(suppMatch) supplier=suppMatch[1];
+    const protMatch=text.match(/Protection Type\s*([0-9]\+[0-9](?:\s*XPIC)?)/i); if(protMatch) protection=protMatch[1];
+    const siteMatch=text.match(/Site Id\s+([a-zA-Z0-9_]+)\s+([a-zA-Z0-9_]+)/i);
+    if(siteMatch){endB=siteMatch[1];endA=siteMatch[2];}
+    const modelMatch=text.match(/Model\s+([a-zA-Z0-9-]+)\s+([a-zA-Z0-9-]+)/i); if(modelMatch){dishB=modelMatch[1];dishA=modelMatch[2];}
+    const sizeMatch=text.match(/Size\s+([\d\.]+)\s+([\d\.]+)/i); if(sizeMatch){sizeB=sizeMatch[1];sizeA=sizeMatch[2];}
+    const oduTypeMatch=text.match(/ODU Type\s+([a-zA-Z0-9-]+)\s+([a-zA-Z0-9-]+)/i); if(oduTypeMatch){oduB=oduTypeMatch[1];oduA=oduTypeMatch[2];}
+    const magMatch=text.match(/Magazine(?: Type)?\s+([a-zA-Z0-9-]+)\s+(.*?)(?=\s+MMU|\n)/i); if(magMatch){magB=magMatch[1];magA=magMatch[2].trim();}
+    const mmuTypeMatch=text.match(/MMU\s*Type.*?\s+(ISM\d+|RTN[\w-]+)\s+(ISM\d+|RTN[\w-]+)/i); if(mmuTypeMatch){mmuB=mmuTypeMatch[1];mmuA=mmuTypeMatch[2];}
+    const freqMatch4=text.match(/Frequency[^\d]*(\d{4,5})[^\d]*(\d{4,5})[^\d]*(\d{4,5})[^\d]*(\d{4,5})/i);
+    const freqMatch2=text.match(/Frequency[^\d]*(\d{4,5})[^\d]*(\d{4,5})/i);
+    if(freqMatch4){freqB=freqMatch4[1]+" / "+freqMatch4[2];freqA=freqMatch4[3]+" / "+freqMatch4[4];}
+    else if(freqMatch2){freqB=freqMatch2[1];freqA=freqMatch2[2];}
+    const mmuIdMatch=text.match(/MMU ID.*?\s+([\d-]+)\s+([\d-]+)/i); if(mmuIdMatch){mmuIdB=mmuIdMatch[1];mmuIdA=mmuIdMatch[2];}
+    const notesMatch=text.match(/Notes\s+(.*)/i); if(notesMatch) notes=notesMatch[1].trim();
+    return {
+      creationDate,lrId,band,supplier,protection,
+      capacity:text.match(/(\d{2,4})\s*(Mbit\/s|Mbps|Gbps)/i)?.[0]||"N/A",
+      dcn:text.match(/inband|outband/i)?.[0]||"N/A",
+      notes,
+      siteB:{siteId:endB!=="N/A"?endB:"SITE_B",dishModel:dishB,size:sizeB,oduType:oduB,magazineType:magB||"N/A",mmuType:mmuB||"N/A",frequency:freqB,mmuId:mmuIdB},
+      siteA:{siteId:endA!=="N/A"?endA:"SITE_A",dishModel:dishA,size:sizeA,oduType:oduA,magazineType:magA||"N/A",mmuType:mmuA||"N/A",frequency:freqA,mmuId:mmuIdA}
+    };
+  });
+  updateAnalysisUI(results, false);
+}
+
+// ─── AI PARSE ───
+async function analyzeWithAI() {
+  const text = document.getElementById('pdfText').value;
+  if(!text.trim()) return alert("Please upload or paste text first.");
+  const statusDiv = document.getElementById('status');
+  statusDiv.innerHTML = `<span class="loading-pulse text-purple-400">Analyzing with AI ✨...</span>`;
+  const promptText = `You are an expert telecom network logistics assistant for Vodafone. Analyze the following Work Order / Link Design text and extract the parameters for EVERY link found. CRITICAL: band must be 2-digit number (11,13,15,18,23,26,38,80). Extract frequencies as TX/RX pairs. If value not found use "N/A". Return ONLY valid JSON with array "links".\n\nText:\n${text}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents:[{parts:[{text:promptText}]}],
+    generationConfig:{
+      responseMimeType:"application/json",
+      responseSchema:{
+        type:"OBJECT",
+        properties:{
+          links:{
+            type:"ARRAY",
+            items:{
+              type:"OBJECT",
+              properties:{
+                creationDate:{type:"STRING"},lrId:{type:"STRING"},band:{type:"STRING"},protection:{type:"STRING"},
+                capacity:{type:"STRING"},dcn:{type:"STRING"},supplier:{type:"STRING"},notes:{type:"STRING"},
+                siteB:{type:"OBJECT",properties:{siteId:{type:"STRING"},dishModel:{type:"STRING"},size:{type:"STRING"},oduType:{type:"STRING"},magazineType:{type:"STRING"},mmuType:{type:"STRING"},frequency:{type:"STRING"},mmuId:{type:"STRING"}}},
+                siteA:{type:"OBJECT",properties:{siteId:{type:"STRING"},dishModel:{type:"STRING"},size:{type:"STRING"},oduType:{type:"STRING"},magazineType:{type:"STRING"},mmuType:{type:"STRING"},frequency:{type:"STRING"},mmuId:{type:"STRING"}}}
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+  try {
+    const data = await fetchWithRetry(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!resultText) throw new Error("No response");
+    const result = JSON.parse(resultText);
+    updateAnalysisUI(result.links||[result], true);
+  } catch(err) {
+    document.getElementById('status').innerHTML = `<span class="text-red-500">AI failed. Try standard parsing.</span>`;
+  }
+}
+
+function updateAnalysisUI(resultsArray, isAI) {
+  if(!Array.isArray(resultsArray)) resultsArray=[resultsArray];
+  let allHtml = `<div class="w-full flex flex-col gap-4 overflow-y-auto scrollbar-thin p-1">`;
+  let autoAddedCount = 0;
+  resultsArray.forEach((res, index) => {
+    const sB = res.siteB||{}; const sA = res.siteA||{};
+    allHtml += `
+    <div class="w-full text-left bg-gray-900/60 rounded-xl border border-white/10 overflow-hidden shadow-lg flex flex-col">
+      <div class="bg-gradient-to-r from-purple-900/40 to-transparent p-3 font-bold text-purple-300 border-b border-white/5 text-[10px] uppercase tracking-wider flex items-center justify-between">
+        <div class="flex items-center gap-2">${isAI?'✨ AI Extracted':'📋 Parsed'} — ${res.lrId||'Link'}</div>
+        <div class="text-gray-400 text-[9px]">Created: <input class="transparent-input w-20" value="${res.creationDate||'N/A'}"></div>
+      </div>
+      <div class="overflow-auto scrollbar-thin w-full">
+        <table class="w-full border-collapse text-center">
+          <thead><tr class="bg-black/40 text-gray-300 border-b border-white/5 uppercase dyn-text-sm font-black">
+            <th class="dyn-pad border-r border-white/5 w-1/4">Parameter</th>
+            <th class="dyn-pad border-r border-white/5">END B</th>
+            <th class="dyn-pad">END A</th>
+          </tr></thead>
+          <tbody class="divide-y divide-white/5">
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">LR/ID</td><td class="dyn-pad font-bold text-white dyn-text" colspan="2"><input class="transparent-input w-full text-center" value="${res.lrId||'N/A'}"></td></tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">Band / Prot</td><td class="dyn-pad font-black text-red-400 dyn-text" colspan="2"><input class="transparent-input w-8 text-right" value="${res.band||''}">G | <input class="transparent-input w-24 text-left" value="${res.protection||''}"></td></tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">Supplier</td><td class="dyn-pad text-white font-bold dyn-text" colspan="2"><input class="transparent-input w-full text-center" value="${res.supplier||'N/A'}"></td></tr>
+            <tr class="hover:bg-white/10 bg-black/60"><td class="dyn-pad border-r border-white/5 font-bold text-purple-300 dyn-text">Site ID</td>
+              <td class="dyn-pad border-r border-white/5 font-black text-white dyn-text"><input class="transparent-input w-full text-center text-blue-300" value="${sB.siteId||'N/A'}"></td>
+              <td class="dyn-pad font-black text-white dyn-text"><input class="transparent-input w-full text-center text-blue-300" value="${sA.siteId||'N/A'}"></td>
+            </tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">Dish Model</td>
+              <td class="dyn-pad border-r border-white/5 text-gray-200 font-bold dyn-text"><input class="transparent-input w-full text-center" value="${sB.dishModel||'N/A'}"></td>
+              <td class="dyn-pad text-gray-200 font-bold dyn-text"><input class="transparent-input w-full text-center" value="${sA.dishModel||'N/A'}"></td>
+            </tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">Size</td>
+              <td class="dyn-pad border-r border-white/5 text-green-400 font-black dyn-text"><input class="transparent-input w-full text-center text-green-400" id="sizeB-${index}" value="${sB.size||'N/A'}"></td>
+              <td class="dyn-pad text-green-400 font-black dyn-text"><input class="transparent-input w-full text-center text-green-400" id="sizeA-${index}" value="${sA.size||'N/A'}"></td>
+            </tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">MMU Type</td>
+              <td class="dyn-pad border-r border-white/5 text-yellow-400 font-bold dyn-text"><input class="transparent-input w-full text-center text-yellow-400" value="${sB.mmuType||'N/A'}"></td>
+              <td class="dyn-pad text-yellow-400 font-bold dyn-text"><input class="transparent-input w-full text-center text-yellow-400" value="${sA.mmuType||'N/A'}"></td>
+            </tr>
+            <tr class="hover:bg-white/5"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text">Frequency</td>
+              <td class="dyn-pad border-r border-white/5 font-black text-blue-300 dyn-text"><input class="transparent-input w-full text-center text-blue-300" value="${sB.frequency||'N/A'}"></td>
+              <td class="dyn-pad font-black text-blue-300 dyn-text"><input class="transparent-input w-full text-center text-blue-300" value="${sA.frequency||'N/A'}"></td>
+            </tr>
+            <tr class="hover:bg-white/5 bg-black/40"><td class="dyn-pad border-r border-white/5 font-bold text-gray-400 dyn-text-sm">Notes</td><td class="dyn-pad text-left text-white font-bold dyn-text" colspan="2"><input class="transparent-input w-full text-left" value="${res.notes||'N/A'}"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-black/50 border-t border-white/5 flex gap-3">
+        <button class="btn-main !bg-green-600 flex-1" onclick="addSpecificKit('${res.band}','${res.protection}','${sB.siteId||res.lrId}',event,document.getElementById('sizeB-${index}').value)">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Kit (END B)
+        </button>
+        <button class="btn-main !bg-emerald-600 flex-1" onclick="addSpecificKit('${res.band}','${res.protection}','${sA.siteId||res.lrId}',event,document.getElementById('sizeA-${index}').value)">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Kit (END A)
+        </button>
+      </div>
+    </div>`;
+    const bBlock = getBlockName(res.band, sB.size, res.protection);
+    const aBlock = getBlockName(res.band, sA.size, res.protection);
+    if(bBlock&&BLOCK_TABLES[bBlock]){ BLOCK_TABLES[bBlock].forEach(item=>basket.push({...item,siteId:sB.siteId||res.lrId})); autoAddedCount++; }
+    if(aBlock&&BLOCK_TABLES[aBlock]){ BLOCK_TABLES[aBlock].forEach(item=>basket.push({...item,siteId:sA.siteId||res.lrId})); autoAddedCount++; }
+  });
+  allHtml += `</div>`;
+  const statusDiv = document.getElementById('status');
+  statusDiv.innerHTML = allHtml;
+  statusDiv.classList.remove('items-center','justify-center','p-2');
+  statusDiv.classList.add('items-start','justify-start','p-0','bg-transparent','border-0');
+  lucide.createIcons();
+  if(autoAddedCount>0) { renderBasket(); toast(`${autoAddedCount} kits auto-added to basket!`); }
+}
+
+// ─── AI MODAL HELPERS ───
+function openAiModal(title, iconName, iconColorClass) {
+  const overlay = document.getElementById('aiResponseOverlay');
+  document.getElementById('aiModalIcon').setAttribute('data-lucide', iconName);
+  document.getElementById('aiModalIcon').className = iconColorClass;
+  document.getElementById('aiModalTitle').textContent = title;
+  lucide.createIcons();
+  document.getElementById('aiModalContent').innerHTML = `<span class="loading-pulse">AI is generating response...</span>`;
+  overlay.classList.remove('hidden');
+  return document.getElementById('aiModalContent');
+}
+
+function copyAiContent() {
+  const text = document.getElementById('aiModalContent').innerText;
+  const ta = document.createElement("textarea");
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); alert("Copied!"); } catch(e) { alert("Copy failed."); }
+  document.body.removeChild(ta);
+}
+
+async function runAiModal(title, icon, color, prompt) {
+  const textDiv = openAiModal(title, icon, color);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  try {
+    const data = await fetchWithRetry(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const r = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!r) throw new Error("No response");
+    textDiv.innerHTML = r.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong class="text-white">$1</strong>');
+  } catch(e) {
+    textDiv.innerHTML = `<span class="text-red-500">AI request failed. Check API key/connection.</span>`;
+  }
+}
+
+async function summarizeConfigWithAI() {
+  const text = document.getElementById('pdfText').value;
+  if(!text.trim()) return alert("Upload/paste text first.");
+  await runAiModal("RF Config Summary","radio-tower","text-fuchsia-400",
+    `You are a senior microwave transmission engineer. Analyze this telecom Work Order and summarize ONLY the RF/Transmission config parameters (Modulation, Channel Spacing, TX Power, RX Threshold, ATPC, Capacity) in bullet points.\n\n${text}`);
+}
+async function estimateLogisticsWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("Logistics Estimator","truck","text-orange-400",
+    `Expert telecom logistics manager: estimate total shipping weight (kg) and volume (CBM) for these materials. Breakdown by category.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+async function generateQAChecklistWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("QA Checklist","check-square","text-cyan-400",
+    `Senior QA engineer: generate a strict bulleted QA checklist for field team after installing these telecom materials.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+async function generateSiteAccessWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("Site Access & Permits","key","text-yellow-400",
+    `Senior telecom coordinator: outline site access requirements, permits needed, and logistics coordination for these materials.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+async function generateTroubleshootingWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("Troubleshooting Guide","wrench","text-rose-400",
+    `Senior field support engineer: concise troubleshooting guide for common installation/commissioning issues for these materials.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+async function validateBasketWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("MRN Validation","check-circle","text-indigo-400",
+    `Senior telecom logistics validator: review this MRN draft for missing components (e.g. ODU without antenna, missing SFPs, unusual quantities).\n\n${JSON.stringify(basket,null,2)}`);
+}
+async function draftEmailWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("Handover Email","mail","text-teal-400",
+    `Professional telecom project coordinator: draft a formal email to Warehouse & Logistics requesting dispatch of these materials. Group by Site ID.\n\n${JSON.stringify(basket,null,2)}`);
+}
+async function generateProjectPlanWithAI() {
+  if(!basket.length) return alert("Basket is empty.");
+  await runAiModal("Project Plan","calendar","text-pink-400",
+    `Senior telecom project manager: generate high-level installation project plan for these materials including pre-requisites, mounting, cabling, alignment, commissioning steps.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+async function generateSafetyBriefWithAI() {
+  if(!basket.length) return alert("Add items to basket first.");
+  await runAiModal("Safety Brief","shield-alert","text-amber-400",
+    `HSE executive telecom: safety briefing for field engineers installing these materials. Highlight RF radiation, electrical, heavy lifting risks.\n\n${JSON.stringify(basket.map(i=>i.description))}`);
+}
+
+// ─── CHAT ───
+function toggleChat() { document.getElementById('ai-chat-widget').classList.toggle('hidden'); }
+
+async function sendChatMessage() {
+  const inputEl = document.getElementById('chat-input');
+  const msg = inputEl.value.trim();
+  if(!msg) return;
+  const chatContainer = document.getElementById('chat-messages');
+  chatContainer.innerHTML += `<div class="chat-bubble-user p-3 rounded-xl text-gray-200 self-end ml-6">${msg}</div>`;
+  inputEl.value = '';
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+  const typingId = 'typing-' + Date.now();
+  chatContainer.innerHTML += `<div id="${typingId}" class="chat-bubble-ai p-3 rounded-xl text-gray-400 loading-pulse mr-6">Thinking...</div>`;
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const contextBlocks = Object.keys(BLOCK_TABLES).join(', ');
+  const prompt = `You are a helpful telecom engineering and logistics assistant. Context: MRN Builder app, blocks: ${contextBlocks}. User: "${msg}" — respond briefly and professionally.`;
+  try {
+    const data = await fetchWithRetry(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const r = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    document.getElementById(typingId).remove();
+    chatContainer.innerHTML += `<div class="chat-bubble-ai p-3 rounded-xl text-gray-200 mr-6">${(r||"No response.").replace(/\*\*(.*?)\*\*/g,'<b class="text-white">$1</b>')}</div>`;
+  } catch(e) {
+    document.getElementById(typingId).remove();
+    chatContainer.innerHTML += `<div class="chat-bubble-ai p-3 rounded-xl text-red-400 mr-6">Error: Unable to connect to AI.</div>`;
+  }
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// ─── XLSX EXPORT (35-col) ───
+function exportMRN() {
+  if(!basket.length) return alert("Basket is empty!");
+  const d = new Date();
+  const date = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+  const plant = document.getElementById('defPlant').value||"EGJV";
+  const text = document.getElementById('defText').value||"TX-Project";
+  const approver = document.getElementById('defApprover').value||"70474211";
+  const receiver = document.getElementById('defReceiver').value||"26201647";
+  const sloc = document.getElementById('defSloc').value||"0100";
+  const wbs = document.getElementById('defWbs').value||"";
+  const headers = ["Seq. No","Plant","Text","Location","Req Date","Forecast Installation Date","Site Operator/ DP Id","Site Operator/ DP Name","Security/Engineer Contact","Site Operator/DP Address","DP Contact No","TP ID_Header","TP Description","Special Ins","MRN Approver","MRN Receiver","Stock","Procurement","Material","Qty","UoM","Sloc","OPEX Ind","WBS","Info Record","Agreement","Agreement Item","MRN No","Status","Comments","Site Picking","Partial Delivey","External's Email ID","User/Approver Comments","TP ID_Item"];
+  const data = [headers];
+  basket.forEach((r,i) => {
+    const row = new Array(35).fill("");
+    row[0]=i+1; row[1]=plant; row[2]=text; row[3]=r.siteId||"";
+    row[4]=date; row[5]=date; row[6]="400158105"; row[7]="PLATINUM";
+    row[8]=""; row[9]="NASR CITY,CAIRO,01,EG"; row[10]="";
+    row[14]=approver; row[15]=receiver; row[16]="X";
+    row[18]=r.materialNumber||""; row[19]=r.defaultQty||0;
+    row[20]="EA"; row[21]=sloc; row[23]=wbs;
+    row[29]=r.description||""; row[30]=r.description||"";
+    data.push(row);
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, "MRN_Export");
+  XLSX.writeFile(wb, `VODAFONE_MRN_${Date.now()}.xlsx`);
+  toast("XLSX exported successfully!");
+}
+
+// ════════════════════════════════
+// PDF GENERATOR STATE & LOGIC
+// ════════════════════════════════
+let pdfRows = [];
+
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('pdf_date').value = today;
+document.getElementById('pdf_install').value = today;
+
+// Sync basket → PDF rows
+function syncBasketToPDF() {
+  if(!basket.length) { toast("Basket is empty — add items first", "error"); return; }
+  pdfRows = basket.map(item => ({
+    siteId: (item.siteId||'TBD').toUpperCase(),
+    materialNumber: item.materialNumber||'—',
+    description: item.description||'N/A',
+    qty: parseInt(item.defaultQty||item.qty||1)
+  }));
+  // Sync header fields from basket defaults
+  const plant = document.getElementById('defPlant').value;
+  const sloc = document.getElementById('defSloc').value;
+  const approver = document.getElementById('defApprover').value;
+  const receiver = document.getElementById('defReceiver').value;
+  const text = document.getElementById('defText').value;
+  const wbs = document.getElementById('defWbs').value;
+  if(plant) document.getElementById('pdf_plant').value = plant;
+  if(sloc) document.getElementById('pdf_sloc').value = sloc;
+  if(approver) document.getElementById('pdf_approver').value = approver;
+  if(receiver) document.getElementById('pdf_receiver').value = receiver;
+  if(text) document.getElementById('pdf_text').value = text;
+  if(wbs) document.getElementById('pdf_wbs').value = wbs;
+  renderPDFTable();
+  switchTab('pdf');
+  toast(`${pdfRows.length} rows synced from basket → PDF!`);
+}
+
+function renderPDFTable() {
+  const tbody = document.getElementById('pdf-tbody');
+  const plant = document.getElementById('pdf_plant').value||'EGJV';
+  const sloc = document.getElementById('pdf_sloc').value||'0100';
+  const wbs = document.getElementById('pdf_wbs').value||'';
+  const counter = document.getElementById('pdf-counter');
+  const statsEl = document.getElementById('pdf-stats');
+
+  if(!pdfRows.length){
+    tbody.innerHTML=`<tr id="pdf-empty"><td colspan="10" class="text-center py-12 text-gray-600"><div class="text-3xl mb-2">📦</div><div class="text-sm font-bold">No materials yet — sync your basket or add rows manually</div></td></tr>`;
+    counter.textContent='0 rows';
+    statsEl.style.display='none';
+    return;
+  }
+
+  statsEl.style.display='grid';
+  const totalQty = pdfRows.reduce((a,r)=>a+(parseInt(r.qty)||0),0);
+  document.getElementById('ps-rows').textContent = pdfRows.length;
+  document.getElementById('ps-sites').textContent = new Set(pdfRows.map(r=>r.siteId)).size;
+  document.getElementById('ps-qty').textContent = totalQty;
+  document.getElementById('ps-mats').textContent = new Set(pdfRows.map(r=>r.materialNumber)).size;
+  counter.textContent = `${pdfRows.length} row${pdfRows.length!==1?'s':''}`;
+
+  tbody.innerHTML = pdfRows.map((r,i)=>`
+    <tr>
+      <td class="text-gray-600 font-mono text-[11px] w-9">${i+1}</td>
+      <td><input value="${esc(r.siteId)}" onchange="pdfRows[${i}].siteId=this.value" style="width:90px; color:#93c5fd;"/></td>
+      <td><input value="${esc(r.materialNumber)}" onchange="pdfRows[${i}].materialNumber=this.value" style="width:110px; color:#f87171;"/></td>
+      <td><input value="${esc(r.description)}" onchange="pdfRows[${i}].description=this.value" style="width:100%;"/></td>
+      <td><input type="number" value="${r.qty||1}" onchange="pdfRows[${i}].qty=this.value;renderPDFTable();" style="width:60px;text-align:center;color:#4ade80;"/></td>
+      <td class="text-gray-500 font-mono text-[10px]">EA</td>
+      <td class="text-gray-600 font-mono text-[10px]">${plant}</td>
+      <td class="text-gray-600 font-mono text-[10px]">${sloc}</td>
+      <td class="text-gray-600 font-mono text-[10px]">${wbs||'—'}</td>
+      <td><button onclick="pdfRows.splice(${i},1);renderPDFTable();" style="color:#f87171;font-size:11px;background:transparent;border:1px solid rgba(230,0,0,0.2);border-radius:6px;padding:3px 8px;cursor:pointer;">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function esc(str){ return String(str||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function pdfAddRow() {
+  const site = document.getElementById('pe_site').value.trim().toUpperCase();
+  const desc = document.getElementById('pe_desc').value.trim();
+  const mat = document.getElementById('pe_mat').value.trim();
+  const qty = parseInt(document.getElementById('pe_qty').value)||1;
+  if(!desc&&!mat){ toast("Enter description or material number","error"); return; }
+  pdfRows.push({ siteId:site||'TBD', materialNumber:mat||'—', description:desc||'N/A', qty });
+  document.getElementById('pe_desc').value='';
+  document.getElementById('pe_mat').value='';
+  document.getElementById('pe_qty').value='';
+  renderPDFTable();
+  toast(`Row added: ${desc||mat}`);
+}
+
+document.getElementById('pe_qty').addEventListener('keydown', e=>{ if(e.key==='Enter') pdfAddRow(); });
+
+function pdfImportJSON() {
+  const raw = document.getElementById('pdf_json_paste').value.trim();
+  if(!raw){ toast("Paste JSON first","error"); return; }
+  try {
+    const arr = JSON.parse(raw);
+    let added=0;
+    (Array.isArray(arr)?arr:[arr]).forEach(item=>{
+      if(item.materialNumber||item.description){
+        pdfRows.push({
+          siteId:(item.siteId||'TBD').toUpperCase(),
+          materialNumber:item.materialNumber||'—',
+          description:item.description||'N/A',
+          qty:parseInt(item.defaultQty||item.qty||1)
+        });
+        added++;
+      }
+    });
+    renderPDFTable();
+    document.getElementById('pdf_json_paste').value='';
+    toast(`${added} rows imported!`);
+  } catch(e){ toast("Invalid JSON","error"); }
+}
+
+function pdfImportCSV(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l=>l.trim());
+    if(lines.length<2){ toast("CSV appears empty","error"); return; }
+    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/[^a-z]/g,''));
+    let added=0;
+    for(let i=1;i<lines.length;i++){
+      const cols = lines[i].split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+      if(cols.length<2) continue;
+      const get = (keys) => { for(let k of keys){ const idx=headers.indexOf(k); if(idx>=0&&cols[idx]) return cols[idx]; } return ''; };
+      pdfRows.push({
+        siteId:(get(['siteid','site','location'])||'TBD').toUpperCase(),
+        materialNumber:get(['materialnumber','material','matno','mat'])||'—',
+        description:get(['description','desc','name'])||'N/A',
+        qty:parseInt(get(['qty','quantity','defaultqty']))||1
+      });
+      added++;
+    }
+    renderPDFTable();
+    toast(`${added} rows imported from CSV`);
+  };
+  reader.readAsText(file);
+}
+
+function pdfClearAll() {
+  if(!pdfRows.length) return;
+  if(confirm('Clear all PDF rows?')){ pdfRows=[]; renderPDFTable(); toast("Cleared"); }
+}
+
+function pdfExportCSV() {
+  if(!pdfRows.length){ toast("No data","error"); return; }
+  const plant=document.getElementById('pdf_plant').value||'EGJV';
+  const sloc=document.getElementById('pdf_sloc').value||'0100';
+  const wbs=document.getElementById('pdf_wbs').value||'';
+  const headers='Seq,Plant,Site ID,Material #,Description,Qty,UoM,Sloc,WBS\n';
+  const body=pdfRows.map((r,i)=>`${i+1},${plant},${r.siteId},${r.materialNumber},"${r.description}",${r.qty},EA,${sloc},${wbs}`).join('\n');
+  const blob=new Blob([headers+body],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`MRN_${document.getElementById('pdf_mrn').value||Date.now()}.csv`; a.click();
+  toast("CSV exported");
+}
+
+// ─── BUILD PDF ───
+function buildMRNPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+
+  const plant = document.getElementById('pdf_plant').value||'EGJV';
+  const sloc = document.getElementById('pdf_sloc').value||'0100';
+  const wbs = document.getElementById('pdf_wbs').value||'';
+  const mrnNo = document.getElementById('pdf_mrn').value||'DRAFT';
+  const reqDate = document.getElementById('pdf_date').value||today;
+  const instDate = document.getElementById('pdf_install').value||today;
+  const approver = document.getElementById('pdf_approver').value||'—';
+  const receiver = document.getElementById('pdf_receiver').value||'—';
+  const text = document.getElementById('pdf_text').value||'TX-Project';
+  const operator = document.getElementById('pdf_operator').value||'PLATINUM';
+  const dpId = document.getElementById('pdf_dp_id').value||'—';
+  const address = document.getElementById('pdf_address').value||'—';
+  const preparedBy = document.getElementById('pdf_prepared').value||'—';
+  const notes = document.getElementById('pdf_notes').value||'';
+
+  const fmtDate = d => {
+    if(!d) return '—';
+    const [y,m,dd] = d.split('-');
+    return `${dd}.${m}.${y}`;
+  };
+
+  function addPageDecor(pageNum) {
+    // Red top bar
+    doc.setFillColor(220,0,0); doc.rect(0,0,W,11,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+    doc.text('VODAFONE EGYPT · MICROWAVE TRANSMISSION LOGISTICS · MATERIAL REQUEST NOTE', 10, 7.5);
+    doc.text(`MRN: ${mrnNo}`, W-10, 7.5, {align:'right'});
+    // Bottom
+    doc.setFillColor(15,18,28); doc.rect(0,H-7,W,7,'F');
+    doc.setTextColor(120,130,150); doc.setFontSize(5.5); doc.setFont('helvetica','normal');
+    doc.text(`Generated: ${new Date().toLocaleString()}  ·  Plant: ${plant}  ·  Sloc: ${sloc}  ·  Prepared By: ${preparedBy}`, 10, H-2.5);
+    doc.text(`Page ${pageNum}`, W-10, H-2.5, {align:'right'});
+  }
+
+  addPageDecor(1);
+
+  // Title block
+  let y = 15;
+  doc.setFillColor(220,0,0);
+  doc.roundedRect(10, y, W-20, 16, 2, 2, 'F');
+  // Subtle diagonal lines on title
+  doc.setDrawColor(255,255,255,0.05);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('MATERIAL REQUEST NOTE', 18, y+6.5);
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text(`MRN No: ${mrnNo}  ·  Date: ${fmtDate(reqDate)}  ·  Install: ${fmtDate(instDate)}`, 18, y+12.5);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('V', W-16, y+11, {align:'right'});
+  y += 20;
+
+  // Header grid — two rows of 4
+  const headerRows = [
+    [{label:'Plant',val:plant},{label:'Project Text',val:text},{label:'Request Date',val:fmtDate(reqDate)},{label:'Install Date',val:fmtDate(instDate)}],
+    [{label:'MRN Approver',val:approver},{label:'MRN Receiver',val:receiver},{label:'Sloc',val:sloc},{label:'WBS',val:wbs||'—'}],
+    [{label:'Site Operator',val:operator},{label:'DP ID',val:dpId},{label:'DP Address',val:address},{label:'Prepared By',val:preparedBy}],
+  ];
+  const colW = (W-20)/4;
+  headerRows.forEach(row => {
+    let x=10;
+    row.forEach(cell=>{
+      doc.setFillColor(242,244,250); doc.roundedRect(x,y,colW-2,11,1,1,'F');
+      doc.setDrawColor(220,222,232); doc.roundedRect(x,y,colW-2,11,1,1,'S');
+      doc.setTextColor(130,130,155); doc.setFontSize(5.8); doc.setFont('helvetica','bold');
+      doc.text(cell.label.toUpperCase(), x+3, y+4);
+      doc.setTextColor(15,15,35); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+      doc.text(String(cell.val||'—').substring(0,36), x+3, y+9);
+      x += colW;
+    });
+    y += 13;
+  });
+
+  // Notes
+  if(notes){
+    doc.setFillColor(255,248,215); doc.roundedRect(10,y,W-20,8,1,1,'F');
+    doc.setTextColor(120,80,0); doc.setFontSize(6); doc.setFont('helvetica','bold');
+    doc.text('NOTES:', 13, y+5);
+    doc.setFont('helvetica','normal'); doc.setTextColor(60,40,0);
+    doc.text(String(notes).substring(0,110), 30, y+5);
+    y += 10;
+  }
+  y += 3;
+
+  // Materials table
+  const tableHead = [[
+    {content:'#',styles:{halign:'center',cellWidth:9}},
+    {content:'Site ID',styles:{cellWidth:22}},
+    {content:'Material Number',styles:{cellWidth:28}},
+    {content:'Description / Item Name',styles:{cellWidth:'auto'}},
+    {content:'Qty',styles:{halign:'center',cellWidth:14}},
+    {content:'UoM',styles:{halign:'center',cellWidth:12}},
+    {content:'Plant',styles:{halign:'center',cellWidth:14}},
+    {content:'Sloc',styles:{halign:'center',cellWidth:12}},
+    {content:'WBS',styles:{cellWidth:22}},
+  ]];
+
+  const tableBody = pdfRows.map((r,i)=>[
+    {content:i+1, styles:{halign:'center',textColor:[160,160,180],fontSize:7}},
+    {content:(r.siteId||'TBD').toUpperCase(), styles:{textColor:[30,80,200],fontStyle:'bold'}},
+    {content:r.materialNumber||'—', styles:{textColor:[190,0,0],fontStyle:'bold',fontSize:7.5,font:'courier'}},
+    {content:r.description||'N/A'},
+    {content:String(r.qty||1), styles:{halign:'center',fontStyle:'bold',textColor:[0,140,80]}},
+    {content:'EA', styles:{halign:'center',textColor:[120,120,140]}},
+    {content:plant, styles:{halign:'center',textColor:[120,120,140]}},
+    {content:sloc, styles:{halign:'center',textColor:[120,120,140]}},
+    {content:wbs||'—', styles:{textColor:[140,140,155],fontSize:6.5}},
+  ]);
+
+  // Total row
+  const totalQty = pdfRows.reduce((s,r)=>s+(parseInt(r.qty)||0),0);
+  tableBody.push([
+    {content:'',styles:{fillColor:[238,242,250]}},
+    {content:`TOTAL — ${pdfRows.length} line items`,colSpan:3,styles:{fontStyle:'bold',fillColor:[238,242,250],textColor:[40,40,80],fontSize:8}},
+    {content:totalQty,styles:{halign:'center',fontStyle:'bold',textColor:[0,120,60],fillColor:[220,255,235]}},
+    {content:'EA',styles:{halign:'center',fillColor:[238,242,250],textColor:[100,100,120]}},
+    {content:plant,styles:{halign:'center',fillColor:[238,242,250],textColor:[100,100,120]}},
+    {content:'',colSpan:2,styles:{fillColor:[238,242,250]}},
+  ]);
+
+  let pageCount = 1;
+  doc.autoTable({
+    head: tableHead,
+    body: tableBody,
+    startY: y,
+    margin: {left:10,right:10},
+    styles: {
+      fontSize:8, cellPadding:{top:2.5,bottom:2.5,left:3,right:3},
+      valign:'middle', lineColor:[218,220,232], lineWidth:0.3,
+      textColor:[30,30,50],
+    },
+    headStyles: {
+      fillColor:[18,20,40], textColor:[190,200,220],
+      fontStyle:'bold', fontSize:7.5,
+      cellPadding:{top:3,bottom:3,left:3,right:3},
+    },
+    alternateRowStyles: { fillColor:[247,248,252] },
+    rowPageBreak:'auto',
+    didDrawPage: d => {
+      if(d.pageNumber>1){ pageCount=d.pageNumber; addPageDecor(d.pageNumber); }
+    },
+    tableLineColor:[200,202,218], tableLineWidth:0.3,
+  });
+
+  // Signature block
+  let signY = doc.lastAutoTable.finalY + 8;
+  if(signY + 30 > H-15){ doc.addPage(); pageCount++; addPageDecor(pageCount); signY=18; }
+
+  doc.setFillColor(245,246,250); doc.roundedRect(10,signY,W-20,26,2,2,'F');
+  doc.setDrawColor(208,210,225); doc.roundedRect(10,signY,W-20,26,2,2,'S');
+  const sigCols = [
+    {label:'Prepared By',val:preparedBy},
+    {label:'MRN Approver',val:approver},
+    {label:'MRN Receiver',val:receiver},
+    {label:'Date',val:fmtDate(reqDate)},
+  ];
+  const sigW = (W-20)/4;
+  sigCols.forEach((col,i)=>{
+    const sx=10+i*sigW+5;
+    doc.setTextColor(140,140,160); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+    doc.text(col.label.toUpperCase(), sx, signY+5.5);
+    doc.setTextColor(15,15,35); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+    doc.text(col.val||'—', sx, signY+11.5);
+    doc.setDrawColor(180,182,200); doc.setLineWidth(0.4);
+    doc.line(sx, signY+22.5, sx+sigW-8, signY+22.5);
+    doc.setTextColor(170,172,190); doc.setFontSize(5.5); doc.setFont('helvetica','normal');
+    doc.text('Signature', sx, signY+25.5);
+  });
+
+  // Fix page numbers
+  const total = doc.internal.getNumberOfPages();
+  for(let i=1;i<=total;i++){
+    doc.setPage(i);
+    doc.setFillColor(15,18,28); doc.rect(W-28,H-7,28,7,'F');
+    doc.setTextColor(120,130,150); doc.setFontSize(5.5); doc.setFont('helvetica','normal');
+    doc.text(`Page ${i} of ${total}`, W-10, H-2.5, {align:'right'});
+  }
+  return doc;
+}
+
+function generateMRNPDF() {
+  if(!pdfRows.length){ toast("Add materials first","error"); return; }
+  try {
+    const doc = buildMRNPDF();
+    const mrnNo = document.getElementById('pdf_mrn').value||'DRAFT';
+    doc.save(`MRN_${mrnNo}_${Date.now()}.pdf`);
+    toast(`PDF saved: MRN_${mrnNo}.pdf`);
+  } catch(e){ console.error(e); toast("PDF failed: "+e.message,"error"); }
+}
+
+function previewMRNPDF() {
+  if(!pdfRows.length){ toast("Add materials first","error"); return; }
+  try {
+    const doc = buildMRNPDF();
+    const blob = doc.output('blob');
+    window.open(URL.createObjectURL(blob),'_blank');
+    toast("Preview opening in new tab...");
+  } catch(e){ toast("Preview failed: "+e.message,"error"); }
+}
+
+// ─── DRAG & DROP ───
+document.querySelectorAll('.import-zone').forEach(zone=>{
+  zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', ()=>zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e=>{ e.preventDefault(); zone.classList.remove('drag-over'); });
+});
+
+// ─── INIT ───
+window.onload = () => {
+  loadSettingsFromStorage();
+  renderBlockButtons();
+  renderCatalog();
+  if(basket.length>0) renderBasket();
+  renderPDFTable();
+  lucide.createIcons();
+};
+</script>
 </body>
 </html>
